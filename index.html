@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HiddenDrop — Reveal the Mystery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root {
+      --bg: #080808;
+      --surface: #111111;
+      --border: #222222;
+      --accent: #f0e040;
+      --accent2: #ff4d4d;
+      --text: #f0f0f0;
+      --muted: #555555;
+      --tile-locked: #1a1a1a;
+      --tile-border: #2a2a2a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(240,224,64,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(240,224,64,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    header { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 24px 40px; border-bottom: 1px solid var(--border); }
+    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 30px rgba(240,224,64,0.4); }
+    .logo span { color: var(--text); }
+    .header-stats { display: flex; gap: 32px; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); }
+    .header-stats b { color: var(--accent); font-size: 1rem; display: block; }
+    .hero { position: relative; z-index: 10; text-align: center; padding: 48px 40px 32px; }
+    .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: 6px; line-height: 1; margin-bottom: 12px; }
+    .hero h1 em { color: var(--accent); font-style: normal; }
+    .hero p { color: var(--muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto 32px; line-height: 1.7; }
+    .prize-badge { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #1a1a00, #2a2a00); border: 1px solid var(--accent); border-radius: 4px; padding: 10px 24px; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent); box-shadow: 0 0 20px rgba(240,224,64,0.15); }
+    .prize-badge .amount { font-size: 1.4rem; font-weight: 700; }
+    .main { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 320px; gap: 32px; padding: 32px 40px; max-width: 1200px; margin: 0 auto; }
+    .puzzle-wrap { position: relative; }
+    .puzzle-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
+    .puzzle-container { position: relative; width: 100%; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #0a0a0a; }
+    .tile-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); }
+    .tile { border: 1px solid var(--tile-border); background: var(--tile-locked); cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; }
+    .tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%); }
+    .tile:hover { background: #222; border-color: var(--accent); z-index: 2; transform: scale(1.05); box-shadow: 0 0 12px rgba(240,224,64,0.3); }
+    .tile.revealed { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
+    .tile.last-tile { border-color: var(--accent2) !important; animation: pulse-red 1s infinite; }
+    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 8px rgba(255,77,77,0.4); } 50% { box-shadow: 0 0 20px rgba(255,77,77,0.8); } }
+    .sidebar { display: flex; flex-direction: column; gap: 20px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
+    .card-title { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+    .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #ffaa00); border-radius: 3px; transition: width 0.5s ease; width: 0%; }
+    .progress-text { display: flex; justify-content: space-between; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+    .progress-text span:first-child { color: var(--accent); font-size: 1.1rem; font-weight: 700; }
+    .prize-info { text-align: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .prize-info .prize-amount { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--accent); letter-spacing: 2px; text-shadow: 0 0 20px rgba(240,224,64,0.3); display: block; }
+    .prize-info .prize-label { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+    .prize-rule { font-size: 0.78rem; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--accent); padding-left: 12px; }
+    .buy-section { display: flex; flex-direction: column; gap: 12px; }
+    .price-display { display: flex; align-items: center; justify-content: space-between; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+    .price-display strong { color: var(--text); font-size: 1rem; }
+    .btn-buy { width: 100%; padding: 16px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 3px; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; }
+    .btn-buy::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: left 0.4s ease; }
+    .btn-buy:hover::before { left: 100%; }
+    .btn-buy:hover { background: #fff; box-shadow: 0 0 30px rgba(240,224,64,0.5); transform: translateY(-1px); }
+    .btn-buy:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+    .crypto-note { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; }
+    .crypto-note::before { content: '₿'; color: var(--accent); font-size: 0.9rem; }
+    .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; }
+    .activity-list::-webkit-scrollbar { width: 3px; }
+    .activity-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .activity-item { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+    .activity-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+    .activity-text { color: var(--muted); flex: 1; }
+    .activity-text b { color: var(--text); }
+    .activity-time { color: var(--border); font-family: 'Space Mono', monospace; font-size: 0.65rem; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+    .modal-overlay.active { opacity: 1; pointer-events: all; }
+    .modal { background: var(--surface); border: 1px solid var(--accent); border-radius: 4px; padding: 40px; max-width: 480px; width: 90%; position: relative; box-shadow: 0 0 60px rgba(240,224,64,0.15); transform: scale(0.95); transition: transform 0.3s ease; }
+    .modal-overlay.active .modal { transform: scale(1); }
+    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; font-family: 'Space Mono', monospace; }
+    .modal-close:hover { color: var(--text); }
+    .modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; margin-bottom: 8px; color: var(--accent); }
+    .modal p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 24px; }
+    .tile-info { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 20px; font-family: 'Space Mono', monospace; font-size: 0.75rem; }
+    .tile-info div { display: flex; justify-content: space-between; padding: 4px 0; color: var(--muted); }
+    .tile-info div span:last-child { color: var(--text); }
+    .wallet-input-wrap { margin-bottom: 16px; }
+    .wallet-input-wrap label { display: block; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 8px; }
+    .wallet-input-wrap input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.8rem; outline: none; transition: border-color 0.2s; }
+    .wallet-input-wrap input:focus { border-color: var(--accent); }
+    .wallet-input-wrap input::placeholder { color: var(--muted); }
+    .coin-select { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .coin-btn { padding: 6px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.2s; }
+    .coin-btn:hover, .coin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,224,64,0.05); }
+    .btn-confirm { width: 100%; padding: 14px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 3px; cursor: pointer; transition: all 0.2s; }
+    .btn-confirm:hover { background: #fff; box-shadow: 0 0 20px rgba(240,224,64,0.4); }
+    .btn-confirm:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+    .payment-address-box { background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; padding: 16px; margin-bottom: 16px; text-align: center; }
+    .payment-address-box .address { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--accent); word-break: break-all; margin-bottom: 8px; }
+    .payment-address-box .copy-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: 'Space Mono', monospace; }
+    .payment-address-box .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.7rem; }
+    .status-waiting { background: rgba(240,224,64,0.1); color: var(--accent); border: 1px solid var(--accent); }
+    .status-confirmed { background: rgba(77,255,136,0.1); color: #4dff88; border: 1px solid #4dff88; }
+    .status-error { background: rgba(255,77,77,0.1); color: var(--accent2); border: 1px solid var(--accent2); }
+    .ticker { position: relative; z-index: 10; background: var(--accent); color: #000; padding: 8px 0; overflow: hidden; font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; white-space: nowrap; }
+    .ticker-inner { display: inline-block; animation: ticker 20s linear infinite; }
+    @keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+    @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    .confetti-piece { position: fixed; width: 8px; height: 8px; z-index: 200; animation: confetti-fall 3s ease-in forwards; }
+    .loading-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+    .loading-overlay.hidden { display: none; }
+    .loading-text { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); }
+    .loading-logo { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--accent); letter-spacing: 6px; }
+    @media (max-width: 768px) { header { padding: 16px 20px; } .header-stats { gap: 16px; } .main { grid-template-columns: 1fr; padding: 20px; } .hero { padding: 32px 20px 20px; } }
+  </style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-logo">HiddenDrop</div>
+  <div class="loading-text">Loading game state...</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">Hidden<span>Drop</span></div>
+  <div class="header-stats">
+    <div><b id="stat-revealed">0</b>tiles revealed</div>
+    <div><b id="stat-remaining">100</b>tiles left</div>
+    <div><b id="stat-prize">$0.00</b>prize pool</div>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker">
+  <span class="ticker-inner" id="ticker-text">
+    🔒 HIDDENDROP — REVEAL TILES — WIN THE PRIZE POOL — PAY WITH CRYPTO — 100 TILES TOTAL 🏆
+  </span>
+</div>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>ONE IMAGE.<br/><em>100 SECRETS.</em></h1>
+  <p>Each tile hides part of a mystery image. Buy a tile to reveal it — the last tile revealed wins the prize pool.</p>
+  <div class="prize-badge">
+    <span>🏆 CURRENT PRIZE</span>
+    <span class="amount" id="hero-prize">$0.00</span>
+    <span>USDT</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="puzzle-wrap">
+    <div class="puzzle-label">// mystery image — 100 tiles — $1 each</div>
+    <div class="puzzle-container">
+      <canvas id="hidden-image" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+      <div class="tile-grid" id="tile-grid"></div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="card">
+      <div class="card-title">// progress</div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-text">
+        <span id="revealed-num">0</span>
+        <span id="remaining-num">100 left</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">// prize pool</div>
+      <div class="prize-info">
+        <span class="prize-amount" id="prize-amount">$0.00</span>
+        <span class="prize-label">USDT · LIVE TOTAL</span>
+      </div>
+      <p class="prize-rule">The player who reveals the <strong style="color:var(--accent)">last tile</strong> wins <strong style="color:var(--accent)">20%</strong> of the total prize pool. Paid instantly in USDT.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">// reveal a tile</div>
+      <div class="buy-section">
+        <div class="price-display"><span>Price per tile</span><strong>$1.00 USDT</strong></div>
+        <button class="btn-buy" id="buy-btn">REVEAL A TILE</button>
+        <div class="crypto-note">Powered by NOWPayments · Crypto only</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">// live activity</div>
+      <div class="activity-list" id="activity-list">
+        <div style="color:var(--muted);font-size:0.8rem;font-family:'Space Mono',monospace;">Waiting for first reveal...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BUY MODAL -->
+<div class="modal-overlay" id="buy-modal">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <h2>Reveal a Tile</h2>
+    <p>Pay $1 USDT to reveal a random tile. If it's the last one — you win the prize!</p>
+    <div class="tile-info">
+      <div><span>Tile price</span><span>$1.00 USDT</span></div>
+      <div><span>Tiles remaining</span><span id="modal-remaining">100</span></div>
+      <div><span>Chance of last tile</span><span id="modal-chance">1%</span></div>
+      <div><span>Current prize</span><span id="modal-prize">$0.00 USDT</span></div>
+    </div>
+    <div class="wallet-input-wrap">
+      <label>YOUR WALLET (to receive prize if you win)</label>
+      <input type="text" id="wallet-input" placeholder="Your crypto wallet address" />
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
+      <div class="coin-select">
+        <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
+        <button class="coin-btn" data-coin="btc">BTC</button>
+        <button class="coin-btn" data-coin="eth">ETH</button>
+        <button class="coin-btn" data-coin="trx">TRX</button>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-pay">PAY & REVEAL</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <button class="modal-close" id="payment-close">✕</button>
+    <h2>Complete Payment</h2>
+    <p>Send exactly the amount below. Your tile reveals automatically after confirmation.</p>
+    <div class="tile-info">
+      <div><span>Amount</span><span id="pay-amount">—</span></div>
+      <div><span>Network</span><span id="pay-network">—</span></div>
+      <div><span>Status</span><span id="pay-status"><span class="status-badge status-waiting">Waiting...</span></span></div>
+    </div>
+    <div class="payment-address-box">
+      <div class="address" id="pay-address">Generating address...</div>
+      <button class="copy-btn" id="copy-address-btn">Copy Address</button>
+    </div>
+    <p style="text-align:center;font-size:0.75rem;color:var(--muted);margin-bottom:0;">Send payment and wait for blockchain confirmation.<br/>This may take 1-5 minutes.</p>
+  </div>
+</div>
+
+<script>
+// ─── CONFIG — حط هون الـ Keys تبعك ───────────────────────────────
+const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5lYWdia3JtaHllY25wb25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDYxNDUsImV4cCI6MjA5NTkyMjE0NX0.m_Sl1-8pmg_RJRJlk6vlv5bZb3aMdFs-rx6Rd0y4n_c'
+// NOWPayments Key is now safely in the backend (Vercel Environment Variables)
+
+// ─── INIT SUPABASE ────────────────────────────────────────────────
+const { createClient } = supabase
+const db = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+// ─── STATE ────────────────────────────────────────────────────────
+const TOTAL_TILES = 100
+const TILE_PRICE = 1.00
+const PRIZE_PERCENT = 0.20
+let revealedTiles = new Set()
+let selectedCoin = 'usdttrc20'
+let currentPaymentId = null
+let pollInterval = null
+
+// ─── DRAW HIDDEN IMAGE ────────────────────────────────────────────
+function drawHiddenImage() {
+  const canvas = document.getElementById('hidden-image')
+  const container = canvas.parentElement
+  canvas.width = container.offsetWidth || 600
+  canvas.height = container.offsetHeight || 600
+  const ctx = canvas.getContext('2d')
+  const grd1 = ctx.createRadialGradient(canvas.width*0.3, canvas.height*0.3, 0, canvas.width*0.3, canvas.height*0.3, canvas.width*0.6)
+  grd1.addColorStop(0, '#f0e040')
+  grd1.addColorStop(0.4, '#ff6600')
+  grd1.addColorStop(1, '#000033')
+  const grd2 = ctx.createRadialGradient(canvas.width*0.8, canvas.height*0.7, 0, canvas.width*0.8, canvas.height*0.7, canvas.width*0.5)
+  grd2.addColorStop(0, '#ff0080')
+  grd2.addColorStop(0.5, '#6600ff')
+  grd2.addColorStop(1, 'transparent')
+  ctx.fillStyle = grd1
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.globalCompositeOperation = 'screen'
+  ctx.fillStyle = grd2
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.globalCompositeOperation = 'source-over'
+  ctx.font = 'bold 48px Bebas Neue, sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.15)'
+  ctx.textAlign = 'center'
+  ctx.fillText('MYSTERY', canvas.width/2, canvas.height/2 - 20)
+  ctx.fillText('REVEALED', canvas.width/2, canvas.height/2 + 40)
+}
+
+// ─── BUILD GRID ───────────────────────────────────────────────────
+function buildGrid() {
+  const grid = document.getElementById('tile-grid')
+  grid.innerHTML = ''
+  for(let i = 0; i < TOTAL_TILES; i++) {
+    const tile = document.createElement('div')
+    tile.className = 'tile'
+    tile.dataset.index = i
+    if(revealedTiles.has(i)) tile.classList.add('revealed')
+    tile.addEventListener('click', () => {
+      if(!tile.classList.contains('revealed')) openBuyModal()
+    })
+    grid.appendChild(tile)
+  }
+  highlightLastTile()
+}
+
+function highlightLastTile() {
+  const remaining = TOTAL_TILES - revealedTiles.size
+  if(remaining === 1) {
+    document.querySelectorAll('.tile:not(.revealed)').forEach(t => t.classList.add('last-tile'))
+  }
+}
+
+// ─── UPDATE UI ────────────────────────────────────────────────────
+function updateStats() {
+  const revealed = revealedTiles.size
+  const remaining = TOTAL_TILES - revealed
+  const prize = (revealed * TILE_PRICE * PRIZE_PERCENT).toFixed(2)
+  const pct = (revealed / TOTAL_TILES * 100).toFixed(0)
+  document.getElementById('stat-revealed').textContent = revealed
+  document.getElementById('stat-remaining').textContent = remaining
+  document.getElementById('stat-prize').textContent = `$${prize}`
+  document.getElementById('hero-prize').textContent = `$${prize}`
+  document.getElementById('prize-amount').textContent = `$${prize}`
+  document.getElementById('revealed-num').textContent = revealed
+  document.getElementById('remaining-num').textContent = `${remaining} left`
+  document.getElementById('progress-fill').style.width = `${pct}%`
+  document.getElementById('modal-remaining').textContent = remaining
+  document.getElementById('modal-chance').textContent = `${(1/Math.max(remaining,1)*100).toFixed(2)}%`
+  document.getElementById('modal-prize').textContent = `$${prize} USDT`
+}
+
+// ─── LOAD FROM SUPABASE ───────────────────────────────────────────
+async function loadGameState() {
+  try {
+    const { data, error } = await db.from('tiles').select('id').eq('revealed', true)
+    if(error) throw error
+    revealedTiles = new Set(data.map(r => r.id))
+    buildGrid()
+    updateStats()
+  } catch(e) {
+    console.error('Load error:', e)
+  }
+  document.getElementById('loading-overlay').classList.add('hidden')
+}
+
+// ─── REALTIME UPDATES ─────────────────────────────────────────────
+function subscribeRealtime() {
+  db.channel('tiles-changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tiles' }, payload => {
+      if(payload.new.revealed) {
+        const id = payload.new.id
+        revealedTiles.add(id)
+        const tile = document.querySelector(`[data-index="${id}"]`)
+        if(tile) {
+          tile.style.transition = 'all 0.6s ease'
+          tile.style.transform = 'scale(1.1)'
+          tile.style.boxShadow = '0 0 30px rgba(240,224,64,0.6)'
+          setTimeout(() => {
+            tile.classList.add('revealed')
+            tile.style.transform = ''
+            tile.style.boxShadow = ''
+          }, 300)
+        }
+        addActivity(`Tile #${id}`, id)
+        updateStats()
+        highlightLastTile()
+        if(revealedTiles.size === TOTAL_TILES) setTimeout(showWinner, 800)
+      }
+    })
+    .subscribe()
+}
+
+// ─── ACTIVITY FEED ────────────────────────────────────────────────
+function addActivity(wallet, tileIndex) {
+  const list = document.getElementById('activity-list')
+  if(list.querySelector('div[style]')) list.innerHTML = ''
+  const item = document.createElement('div')
+  item.className = 'activity-item'
+  const shortW = wallet.length > 12 ? wallet.slice(0,6)+'...'+wallet.slice(-4) : wallet
+  item.innerHTML = `
+    <div class="activity-dot"></div>
+    <div class="activity-text"><b>${shortW}</b> revealed tile #${tileIndex}</div>
+    <div class="activity-time">just now</div>
+  `
+  list.insertBefore(item, list.firstChild)
+  if(list.children.length > 10) list.removeChild(list.lastChild)
+}
+
+// ─── MODALS ───────────────────────────────────────────────────────
+function openBuyModal() {
+  updateStats()
+  document.getElementById('buy-modal').classList.add('active')
+}
+
+document.getElementById('buy-btn').addEventListener('click', openBuyModal)
+
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('buy-modal').classList.remove('active')
+})
+
+document.getElementById('payment-close').addEventListener('click', () => {
+  document.getElementById('payment-modal').classList.remove('active')
+  if(pollInterval) clearInterval(pollInterval)
+})
+
+document.querySelectorAll('.coin-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    selectedCoin = btn.dataset.coin
+  })
+})
+
+// ─── CREATE PAYMENT ───────────────────────────────────────────────
+document.getElementById('confirm-pay').addEventListener('click', async () => {
+  const wallet = document.getElementById('wallet-input').value.trim()
+  if(!wallet) {
+    document.getElementById('wallet-input').style.borderColor = 'var(--accent2)'
+    return
+  }
+  document.getElementById('wallet-input').style.borderColor = ''
+
+  const btn = document.getElementById('confirm-pay')
+  btn.disabled = true
+  btn.textContent = 'Creating payment...'
+
+  try {
+    // Pick random unrevealed tile
+    const unrevealed = []
+    for(let i = 0; i < TOTAL_TILES; i++) {
+      if(!revealedTiles.has(i)) unrevealed.push(i)
+    }
+    if(unrevealed.length === 0) { alert('All tiles revealed!'); return }
+    const tileId = unrevealed[Math.floor(Math.random() * unrevealed.length)]
+
+    // Create payment via our backend API
+    const response = await fetch('/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pay_currency: selectedCoin,
+        tile_id: tileId,
+        wallet: wallet
+      })
+    })
+
+    const payment = await response.json()
+
+    if(!payment.pay_address) throw new Error('Payment creation failed')
+
+    currentPaymentId = payment.payment_id
+
+    // Save pending payment to Supabase
+    await db.from('tiles').update({
+      payment_id: payment.payment_id,
+      wallet: wallet
+    }).eq('id', tileId)
+
+    // Show payment modal
+    document.getElementById('buy-modal').classList.remove('active')
+    document.getElementById('pay-amount').textContent = `${payment.pay_amount} ${selectedCoin.toUpperCase()}`
+    document.getElementById('pay-network').textContent = selectedCoin.toUpperCase()
+    document.getElementById('pay-address').textContent = payment.pay_address
+    document.getElementById('payment-modal').classList.add('active')
+
+    // Copy button
+    document.getElementById('copy-address-btn').onclick = () => {
+      navigator.clipboard.writeText(payment.pay_address)
+      document.getElementById('copy-address-btn').textContent = 'Copied! ✓'
+      setTimeout(() => document.getElementById('copy-address-btn').textContent = 'Copy Address', 2000)
+    }
+
+    // Poll payment status
+    pollPaymentStatus(payment.payment_id, tileId, wallet)
+
+  } catch(e) {
+    console.error('Payment error:', e)
+    alert('Error creating payment. Check your API key.')
+  }
+
+  btn.disabled = false
+  btn.textContent = 'PAY & REVEAL'
+})
+
+// ─── POLL PAYMENT STATUS ──────────────────────────────────────────
+function pollPaymentStatus(paymentId, tileId, wallet) {
+  if(pollInterval) clearInterval(pollInterval)
+  pollInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`https://api.nowpayments.io/v1/payment/${paymentId}`, {
+        headers: { 'x-api-key': NOWPAYMENTS_KEY }
+      })
+      const data = await res.json()
+      const statusEl = document.getElementById('pay-status')
+
+      if(data.payment_status === 'finished' || data.payment_status === 'confirmed') {
+        clearInterval(pollInterval)
+        statusEl.innerHTML = '<span class="status-badge status-confirmed">✓ Confirmed!</span>'
+
+        // Reveal tile in Supabase
+        await db.from('tiles').update({
+          revealed: true,
+          wallet: wallet,
+          payment_id: paymentId,
+          revealed_at: new Date().toISOString()
+        }).eq('id', tileId)
+
+        // Update prize pool
+        const { data: gs } = await db.from('game_state').select('total_paid').eq('id', 1).single()
+        await db.from('game_state').update({ total_paid: (gs?.total_paid || 0) + TILE_PRICE }).eq('id', 1)
+
+        setTimeout(() => {
+          document.getElementById('payment-modal').classList.remove('active')
+        }, 2000)
+
+      } else if(data.payment_status === 'failed' || data.payment_status === 'expired') {
+        clearInterval(pollInterval)
+        statusEl.innerHTML = '<span class="status-badge status-error">Failed / Expired</span>'
+      } else {
+        statusEl.innerHTML = `<span class="status-badge status-waiting">${data.payment_status}...</span>`
+      }
+    } catch(e) {
+      console.error('Poll error:', e)
+    }
+  }, 10000) // Check every 10 seconds
+}
+
+// ─── WINNER ───────────────────────────────────────────────────────
+function showWinner() {
+  spawnConfetti()
+  setTimeout(() => alert('🏆 ALL TILES REVEALED! The last revealer wins the prize!'), 500)
+}
+
+function spawnConfetti() {
+  for(let i = 0; i < 80; i++) {
+    const c = document.createElement('div')
+    c.className = 'confetti-piece'
+    c.style.left = Math.random() * 100 + 'vw'
+    c.style.top = '-20px'
+    c.style.background = ['#f0e040','#ff4d4d','#4dff88','#4d88ff'][Math.floor(Math.random()*4)]
+    c.style.animationDelay = Math.random() * 2 + 's'
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0'
+    document.body.appendChild(c)
+    setTimeout(() => c.remove(), 3500)
+  }
+}
+
+// ─── START ────────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  drawHiddenImage()
+  await loadGameState()
+  subscribeRealtime()
+})
+
+window.addEventListener('resize', drawHiddenImage)
+</script>
+</body>
+</html>
