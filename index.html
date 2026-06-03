@@ -15,34 +15,74 @@
       --accent2: #ff4d4d;
       --text: #f0f0f0;
       --muted: #555555;
-      --tile-locked: #1a1a1a;
-      --tile-border: #2a2a2a;
     }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
     body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(240,224,64,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(240,224,64,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+
+    /* HEADER */
     header { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 24px 40px; border-bottom: 1px solid var(--border); }
     .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 30px rgba(240,224,64,0.4); }
     .logo span { color: var(--text); }
     .header-stats { display: flex; gap: 32px; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); }
     .header-stats b { color: var(--accent); font-size: 1rem; display: block; }
-    .hero { position: relative; z-index: 10; text-align: center; padding: 48px 40px 32px; }
-    .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2.5rem, 6vw, 5rem); letter-spacing: 6px; line-height: 1; margin-bottom: 12px; }
+
+    /* TICKER */
+    .ticker { position: relative; z-index: 10; background: var(--accent); color: #000; padding: 8px 0; overflow: hidden; font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; white-space: nowrap; }
+    .ticker-inner { display: inline-block; animation: ticker 25s linear infinite; }
+    @keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
+
+    /* CATEGORIES */
+    .categories-wrap { position: relative; z-index: 10; padding: 32px 40px 0; }
+    .categories-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
+    .categories { display: flex; gap: 12px; flex-wrap: wrap; }
+    .cat-btn { padding: 10px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+    .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .cat-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+    .cat-btn .cat-icon { margin-right: 6px; }
+
+    /* HERO */
+    .hero { position: relative; z-index: 10; text-align: center; padding: 32px 40px 24px; }
+    .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 5vw, 4rem); letter-spacing: 6px; line-height: 1; margin-bottom: 8px; }
     .hero h1 em { color: var(--accent); font-style: normal; }
-    .hero p { color: var(--muted); font-size: 0.95rem; max-width: 480px; margin: 0 auto 32px; line-height: 1.7; }
+    .hero p { color: var(--muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto 20px; line-height: 1.7; }
     .prize-badge { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #1a1a00, #2a2a00); border: 1px solid var(--accent); border-radius: 4px; padding: 10px 24px; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent); box-shadow: 0 0 20px rgba(240,224,64,0.15); }
     .prize-badge .amount { font-size: 1.4rem; font-weight: 700; }
-    .main { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 320px; gap: 32px; padding: 32px 40px; max-width: 1200px; margin: 0 auto; }
+
+    /* IMAGE SELECTOR */
+    .image-selector-wrap { position: relative; z-index: 10; padding: 20px 40px 0; }
+    .image-selector-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; }
+    .image-selector { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
+    .image-selector::-webkit-scrollbar { height: 3px; }
+    .image-selector::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    .img-thumb { width: 80px; height: 60px; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; overflow: hidden; flex-shrink: 0; transition: all 0.2s; position: relative; }
+    .img-thumb img { width: 100%; height: 100%; object-fit: cover; filter: blur(6px); transform: scale(1.1); transition: all 0.2s; }
+    .img-thumb:hover { border-color: var(--accent); }
+    .img-thumb:hover img { filter: blur(0px); transform: scale(1); }
+    .img-thumb.active { border-color: var(--accent); box-shadow: 0 0 12px rgba(240,224,64,0.4); }
+    .img-thumb .thumb-num { position: absolute; bottom: 2px; right: 4px; font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--accent); text-shadow: 0 0 4px #000; }
+    .img-loading { width: 80px; height: 60px; background: var(--surface); border: 2px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .img-loading-dot { width: 6px; height: 6px; background: var(--muted); border-radius: 50%; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    /* MAIN */
+    .main { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 320px; gap: 32px; padding: 24px 40px; max-width: 1200px; margin: 0 auto; }
+
+    /* PUZZLE */
     .puzzle-wrap { position: relative; }
-    .puzzle-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
+    .puzzle-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .puzzle-label .current-img-name { color: var(--accent); }
     .puzzle-container { position: relative; width: 100%; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #0a0a0a; }
+    .puzzle-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(20px); transform: scale(1.1); transition: filter 0.8s ease, transform 0.8s ease; }
+    .puzzle-image.fully-revealed { filter: blur(0px) !important; transform: scale(1) !important; }
     .tile-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); }
-    .tile { border: 1px solid var(--tile-border); background: var(--tile-locked); cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; }
-    .tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%); }
-    .tile:hover { background: #222; border-color: var(--accent); z-index: 2; transform: scale(1.05); box-shadow: 0 0 12px rgba(240,224,64,0.3); }
-    .tile.revealed { background: transparent; border-color: transparent; cursor: default; pointer-events: none; }
+    .tile { border: 1px solid #1a1a1a; background: rgba(8,8,8,0.95); cursor: pointer; transition: all 0.2s ease; position: relative; }
+    .tile:hover { background: rgba(30,30,30,0.9); border-color: var(--accent); z-index: 2; transform: scale(1.05); box-shadow: 0 0 12px rgba(240,224,64,0.3); }
+    .tile.revealed { background: transparent !important; border-color: transparent !important; cursor: default; pointer-events: none; }
     .tile.last-tile { border-color: var(--accent2) !important; animation: pulse-red 1s infinite; }
-    @keyframes pulse-red { 0%, 100% { box-shadow: 0 0 8px rgba(255,77,77,0.4); } 50% { box-shadow: 0 0 20px rgba(255,77,77,0.8); } }
+    @keyframes pulse-red { 0%,100% { box-shadow: 0 0 8px rgba(255,77,77,0.4); } 50% { box-shadow: 0 0 20px rgba(255,77,77,0.8); } }
+
+    /* SIDEBAR */
     .sidebar { display: flex; flex-direction: column; gap: 20px; }
     .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
     .card-title { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
@@ -64,7 +104,7 @@
     .btn-buy:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
     .crypto-note { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; }
     .crypto-note::before { content: '₿'; color: var(--accent); font-size: 0.9rem; }
-    .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 200px; overflow-y: auto; }
+    .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 180px; overflow-y: auto; }
     .activity-list::-webkit-scrollbar { width: 3px; }
     .activity-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     .activity-item { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; animation: slideIn 0.3s ease; }
@@ -73,6 +113,8 @@
     .activity-text { color: var(--muted); flex: 1; }
     .activity-text b { color: var(--text); }
     .activity-time { color: var(--border); font-family: 'Space Mono', monospace; font-size: 0.65rem; }
+
+    /* MODALS */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     .modal-overlay.active { opacity: 1; pointer-events: all; }
     .modal { background: var(--surface); border: 1px solid var(--accent); border-radius: 4px; padding: 40px; max-width: 480px; width: 90%; position: relative; box-shadow: 0 0 60px rgba(240,224,64,0.15); transform: scale(0.95); transition: transform 0.3s ease; }
@@ -97,22 +139,71 @@
     .btn-confirm:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
     .payment-address-box { background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; padding: 16px; margin-bottom: 16px; text-align: center; }
     .payment-address-box .address { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--accent); word-break: break-all; margin-bottom: 8px; }
-    .payment-address-box .copy-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: 'Space Mono', monospace; }
-    .payment-address-box .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .copy-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: 'Space Mono', monospace; }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
     .status-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.7rem; }
     .status-waiting { background: rgba(240,224,64,0.1); color: var(--accent); border: 1px solid var(--accent); }
     .status-confirmed { background: rgba(77,255,136,0.1); color: #4dff88; border: 1px solid #4dff88; }
     .status-error { background: rgba(255,77,77,0.1); color: var(--accent2); border: 1px solid var(--accent2); }
-    .ticker { position: relative; z-index: 10; background: var(--accent); color: #000; padding: 8px 0; overflow: hidden; font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; white-space: nowrap; }
-    .ticker-inner { display: inline-block; animation: ticker 20s linear infinite; }
-    @keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
-    @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
-    .confetti-piece { position: fixed; width: 8px; height: 8px; z-index: 200; animation: confetti-fall 3s ease-in forwards; }
+
+    /* LOADING */
     .loading-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
     .loading-overlay.hidden { display: none; }
     .loading-text { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); }
     .loading-logo { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--accent); letter-spacing: 6px; }
-    @media (max-width: 768px) { header { padding: 16px 20px; } .header-stats { gap: 16px; } .main { grid-template-columns: 1fr; padding: 20px; } .hero { padding: 32px 20px 20px; } }
+
+    /* CONFETTI */
+    @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    .confetti-piece { position: fixed; width: 8px; height: 8px; z-index: 200; animation: confetti-fall 3s ease-in forwards; }
+
+    @media (max-width: 768px) {
+      header { padding: 16px 20px; }
+      .header-stats { gap: 16px; }
+      .main { grid-template-columns: 1fr; padding: 16px 20px; }
+      .hero { padding: 24px 20px 16px; }
+      .categories-wrap { padding: 20px 20px 0; }
+      .image-selector-wrap { padding: 16px 20px 0; }
+    }
+
+    /* HAMBURGER MENU */
+    .hamburger { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; z-index: 200; }
+    .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s ease; }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); z-index: 150; transition: left 0.3s ease; padding: 80px 0 40px; display: flex; flex-direction: column; }
+    .side-menu.open { left: 0; box-shadow: 4px 0 40px rgba(0,0,0,0.5); }
+    .side-menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .side-menu-overlay.open { opacity: 1; pointer-events: all; }
+    .menu-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; color: var(--muted); padding: 0 24px 12px; text-transform: uppercase; }
+    .menu-item { display: flex; align-items: center; gap: 14px; padding: 14px 24px; color: var(--text); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent; text-decoration: none; background: none; border-top: none; border-right: none; border-bottom: none; width: 100%; text-align: left; font-family: 'DM Sans', sans-serif; }
+    .menu-item:hover { background: rgba(240,224,64,0.05); border-left-color: var(--accent); color: var(--accent); }
+    .menu-item .menu-icon { font-size: 1.1rem; width: 20px; text-align: center; }
+    .menu-divider { height: 1px; background: var(--border); margin: 8px 24px; }
+    .menu-item.coffee { margin-top: auto; background: linear-gradient(135deg, #1a1a00, #2a2a00); border-left: 2px solid var(--accent) !important; color: var(--accent) !important; font-family: 'Space Mono', monospace; font-size: 0.8rem; letter-spacing: 1px; }
+    .menu-item.coffee:hover { background: linear-gradient(135deg, #2a2a00, #3a3a00) !important; }
+    .coffee-amounts { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+    .coffee-amount-btn { flex: 1; min-width: 60px; padding: 10px 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+    .coffee-amount-btn:hover, .coffee-amount-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,224,64,0.05); }
+    .coffee-amount-btn .coffee-emoji { display: block; font-size: 1.2rem; margin-bottom: 4px; }
+    .coffee-address-box { background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; padding: 16px; margin-bottom: 16px; text-align: center; }
+    .coffee-address { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--accent); word-break: break-all; margin-bottom: 8px; }
+    .coffee-network { font-size: 0.7rem; color: var(--muted); margin-bottom: 8px; font-family: 'Space Mono', monospace; }
+
+    /* REFERRAL */
+    .referral-bar { position: relative; z-index: 10; background: linear-gradient(135deg, #0d0d00, #1a1a00); border-bottom: 1px solid var(--accent); padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .referral-bar .ref-text { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--accent); }
+    .referral-bar .ref-text span { color: var(--muted); }
+    .ref-link-wrap { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 400px; }
+    .ref-link-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.65rem; outline: none; }
+    .ref-copy-btn { padding: 8px 14px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.65rem; cursor: pointer; font-weight: 700; white-space: nowrap; transition: all 0.2s; }
+    .ref-copy-btn:hover { background: #fff; }
+    .ref-stats { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
+    .ref-stats b { color: #4dff88; }
+    .free-tile-toast { position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #0d2000, #1a3300); border: 1px solid #4dff88; border-radius: 4px; padding: 16px 24px; z-index: 300; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: #4dff88; box-shadow: 0 0 30px rgba(77,255,136,0.3); animation: slideInRight 0.4s ease; display: none; }
+    .free-tile-toast.show { display: block; }
+    @keyframes slideInRight { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .discount-badge { display: inline-block; background: var(--accent2); color: #fff; font-family: 'Space Mono', monospace; font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -120,32 +211,91 @@
 <!-- LOADING -->
 <div class="loading-overlay" id="loading-overlay">
   <div class="loading-logo">HiddenDrop</div>
-  <div class="loading-text">Loading game state...</div>
+  <div class="loading-text" id="loading-text">Loading...</div>
+</div>
+
+<!-- SIDE MENU OVERLAY -->
+<div class="side-menu-overlay" id="menu-overlay"></div>
+
+<!-- SIDE MENU -->
+<div class="side-menu" id="side-menu">
+  <div class="menu-label">// menu</div>
+  <button class="menu-item" onclick="document.getElementById('privacy-modal').classList.add('active');closeMenu()">
+    <span class="menu-icon">🔒</span> Privacy Policy
+  </button>
+  <button class="menu-item" onclick="document.getElementById('security-modal').classList.add('active');closeMenu()">
+    <span class="menu-icon">🛡️</span> Security
+  </button>
+  <button class="menu-item" onclick="document.getElementById('howto-modal').classList.add('active');closeMenu()">
+    <span class="menu-icon">❓</span> How it works
+  </button>
+  <div class="menu-divider"></div>
+  <button class="menu-item coffee" onclick="document.getElementById('coffee-modal').classList.add('active');closeMenu()">
+    <span class="menu-icon">☕</span> BUY ME A COFFEE
+  </button>
 </div>
 
 <!-- HEADER -->
 <header>
+  <button class="hamburger" id="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </button>
   <div class="logo">Hidden<span>Drop</span></div>
   <div class="header-stats">
-    <div><b id="stat-revealed">0</b>tiles revealed</div>
-    <div><b id="stat-remaining">100</b>tiles left</div>
-    <div><b id="stat-prize">$0.00</b>prize pool</div>
+    <div><b id="stat-revealed">0</b>revealed</div>
+    <div><b id="stat-remaining">100</b>left</div>
+    <div><b id="stat-prize">$0.00</b>prize</div>
   </div>
 </header>
 
 <!-- TICKER -->
 <div class="ticker">
-  <span class="ticker-inner" id="ticker-text">
-    🔒 HIDDENDROP — REVEAL TILES — WIN THE PRIZE POOL — PAY WITH CRYPTO — 100 TILES TOTAL 🏆
-  </span>
+  <span class="ticker-inner">🔒 HIDDENDROP — REVEAL TILES TO UNCOVER THE MYSTERY IMAGE — LAST TILE WINS THE PRIZE — PAY WITH CRYPTO — 🏆 WHO WILL WIN? 🔒</span>
+</div>
+
+
+<!-- REFERRAL BAR -->
+<div class="referral-bar" id="referral-bar">
+  <div class="ref-text">🎁 <span>Share your link — when a friend buys a tile, </span>YOU GET ONE FREE!</div>
+  <div class="ref-link-wrap">
+    <input class="ref-link-input" id="ref-link-input" readonly value="Loading..." />
+    <button class="ref-copy-btn" id="ref-copy-btn">COPY LINK</button>
+  </div>
+  <div class="ref-stats">Free tiles earned: <b id="free-tiles-count">0</b></div>
+</div>
+
+<!-- FREE TILE TOAST -->
+<div class="free-tile-toast" id="free-tile-toast">
+  🎉 You earned a FREE tile!<br/>
+  <span style="color:var(--muted);font-size:0.65rem;">Your referral just bought a tile</span>
+</div>
+
+<!-- CATEGORIES -->
+<div class="categories-wrap">
+  <div class="categories-label">// choose a category</div>
+  <div class="categories">
+    <button class="cat-btn active" data-cat="stadiums" data-query="football stadium aerial">🏟️ Stadiums</button>
+    <button class="cat-btn" data-cat="supercars" data-query="supercar exotic car">🚗 Supercars</button>
+    <button class="cat-btn" data-cat="cities" data-query="city aerial night lights">🌆 Cities</button>
+    <button class="cat-btn" data-cat="nature" data-query="nature landscape beautiful">🌿 Nature</button>
+    <button class="cat-btn" data-cat="random" data-query="abstract colorful art">🎲 Random</button>
+  </div>
+</div>
+
+<!-- IMAGE SELECTOR -->
+<div class="image-selector-wrap">
+  <div class="image-selector-label">// select image to reveal</div>
+  <div class="image-selector" id="image-selector">
+    <!-- thumbnails loaded dynamically -->
+  </div>
 </div>
 
 <!-- HERO -->
 <div class="hero">
-  <h1>ONE IMAGE.<br/><em>100 SECRETS.</em></h1>
-  <p>Each tile hides part of a mystery image. Buy a tile to reveal it — the last tile revealed wins the prize pool.</p>
+  <h1>REVEAL THE<br/><em id="current-cat-name">STADIUM</em></h1>
+  <p>Each tile hides part of a mystery image. The image stays blurred until the very last tile is revealed!</p>
   <div class="prize-badge">
-    <span>🏆 CURRENT PRIZE</span>
+    <span>🏆 PRIZE</span>
     <span class="amount" id="hero-prize">$0.00</span>
     <span>USDT</span>
   </div>
@@ -154,9 +304,12 @@
 <!-- MAIN -->
 <div class="main">
   <div class="puzzle-wrap">
-    <div class="puzzle-label">// mystery image — 100 tiles — $1 each</div>
+    <div class="puzzle-label">
+      <span>// <span id="puzzle-label-text">select an image above</span></span>
+      <span class="current-img-name" id="current-img-name"></span>
+    </div>
     <div class="puzzle-container">
-      <canvas id="hidden-image" style="position:absolute;inset:0;width:100%;height:100%;"></canvas>
+      <img id="puzzle-image" class="puzzle-image" src="" alt="mystery" />
       <div class="tile-grid" id="tile-grid"></div>
     </div>
   </div>
@@ -175,24 +328,24 @@
       <div class="card-title">// prize pool</div>
       <div class="prize-info">
         <span class="prize-amount" id="prize-amount">$0.00</span>
-        <span class="prize-label">USDT · LIVE TOTAL</span>
+        <span class="prize-label">USDT · LIVE</span>
       </div>
-      <p class="prize-rule">The player who reveals the <strong style="color:var(--accent)">last tile</strong> wins <strong style="color:var(--accent)">20%</strong> of the total prize pool. Paid instantly in USDT.</p>
+      <p class="prize-rule">The player who reveals the <strong style="color:var(--accent)">last tile</strong> wins <strong style="color:var(--accent)">20%</strong> of the total prize pool instantly.</p>
     </div>
 
     <div class="card">
       <div class="card-title">// reveal a tile</div>
       <div class="buy-section">
-        <div class="price-display"><span>Price per tile</span><strong>$1.00 USDT</strong></div>
+        <div class="price-display"><span>Per tile</span><strong>$2.00 USDT</strong></div>
         <button class="btn-buy" id="buy-btn">REVEAL A TILE</button>
-        <div class="crypto-note">Powered by NOWPayments · Crypto only</div>
+        <div class="crypto-note">NOWPayments · Crypto only</div>
       </div>
     </div>
 
     <div class="card">
       <div class="card-title">// live activity</div>
       <div class="activity-list" id="activity-list">
-        <div style="color:var(--muted);font-size:0.8rem;font-family:'Space Mono',monospace;">Waiting for first reveal...</div>
+        <div style="color:var(--muted);font-size:0.8rem;font-family:'Space Mono',monospace;text-align:center;">No activity yet</div>
       </div>
     </div>
   </div>
@@ -203,12 +356,12 @@
   <div class="modal">
     <button class="modal-close" id="modal-close">✕</button>
     <h2>Reveal a Tile</h2>
-    <p>Pay $1 USDT to reveal a random tile. If it's the last one — you win the prize!</p>
+    <p>Pay $2 USDT to reveal a random tile. The image stays blurred until ALL tiles are revealed. Last tile wins the prize!</p>
     <div class="tile-info">
-      <div><span>Tile price</span><span>$1.00 USDT</span></div>
+      <div><span>Price</span><span>$1.00 USDT</span></div>
       <div><span>Tiles remaining</span><span id="modal-remaining">100</span></div>
-      <div><span>Chance of last tile</span><span id="modal-chance">1%</span></div>
-      <div><span>Current prize</span><span id="modal-prize">$0.00 USDT</span></div>
+      <div><span>Win chance</span><span id="modal-chance">1%</span></div>
+      <div><span>Prize pool</span><span id="modal-prize">$0.00</span></div>
     </div>
     <div class="wallet-input-wrap">
       <label>YOUR WALLET (to receive prize if you win)</label>
@@ -223,7 +376,11 @@
         <button class="coin-btn" data-coin="trx">TRX</button>
       </div>
     </div>
-    <button class="btn-confirm" id="confirm-pay">PAY & REVEAL</button>
+    <div id="free-tile-notice" style="display:none;background:linear-gradient(135deg,#0d2000,#1a3300);border:1px solid #4dff88;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:0.75rem;color:#4dff88;text-align:center;">
+  🎁 You have <b id="free-tiles-available">0</b> free tile(s)! Use one instead of paying?
+  <br/><button onclick="useFreeeTile()" style="margin-top:8px;background:#4dff88;color:#000;border:none;border-radius:4px;padding:6px 16px;font-family:'Space Mono',monospace;font-size:0.7rem;cursor:pointer;font-weight:700;">USE FREE TILE</button>
+</div>
+<button class="btn-confirm" id="confirm-pay">PAY $2 & REVEAL</button>
   </div>
 </div>
 
@@ -239,58 +396,135 @@
       <div><span>Status</span><span id="pay-status"><span class="status-badge status-waiting">Waiting...</span></span></div>
     </div>
     <div class="payment-address-box">
-      <div class="address" id="pay-address">Generating address...</div>
+      <div class="address" id="pay-address">Generating...</div>
       <button class="copy-btn" id="copy-address-btn">Copy Address</button>
     </div>
-    <p style="text-align:center;font-size:0.75rem;color:var(--muted);margin-bottom:0;">Send payment and wait for blockchain confirmation.<br/>This may take 1-5 minutes.</p>
+    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Waiting for blockchain confirmation (1-5 min)</p>
   </div>
 </div>
 
 <script>
-// ─── CONFIG — حط هون الـ Keys تبعك ───────────────────────────────
-const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5lYWdia3JtaHllY25wb25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDYxNDUsImV4cCI6MjA5NTkyMjE0NX0.m_Sl1-8pmg_RJRJlk6vlv5bZb3aMdFs-rx6Rd0y4n_c'
-// NOWPayments Key is now safely in the backend (Vercel Environment Variables)
+// ─── CONFIG ───────────────────────────────────────────────────────
+const SUPABASE_URL = 'حط هون الـ Project URL'
+const SUPABASE_KEY = 'حط هون الـ anon public key'
+const UNSPLASH_KEY = 'حط هون الـ Unsplash Access Key'
 
-// ─── INIT SUPABASE ────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-// ─── STATE ────────────────────────────────────────────────────────
 const TOTAL_TILES = 100
-const TILE_PRICE = 1.00
+const TILE_PRICE = 2.00
 const PRIZE_PERCENT = 0.20
+
 let revealedTiles = new Set()
 let selectedCoin = 'usdttrc20'
-let currentPaymentId = null
+let currentImageUrl = ''
+let currentImageId = null
+let currentCategory = 'stadiums'
+let categoryImages = {}
 let pollInterval = null
 
-// ─── DRAW HIDDEN IMAGE ────────────────────────────────────────────
-function drawHiddenImage() {
-  const canvas = document.getElementById('hidden-image')
-  const container = canvas.parentElement
-  canvas.width = container.offsetWidth || 600
-  canvas.height = container.offsetHeight || 600
-  const ctx = canvas.getContext('2d')
-  const grd1 = ctx.createRadialGradient(canvas.width*0.3, canvas.height*0.3, 0, canvas.width*0.3, canvas.height*0.3, canvas.width*0.6)
-  grd1.addColorStop(0, '#f0e040')
-  grd1.addColorStop(0.4, '#ff6600')
-  grd1.addColorStop(1, '#000033')
-  const grd2 = ctx.createRadialGradient(canvas.width*0.8, canvas.height*0.7, 0, canvas.width*0.8, canvas.height*0.7, canvas.width*0.5)
-  grd2.addColorStop(0, '#ff0080')
-  grd2.addColorStop(0.5, '#6600ff')
-  grd2.addColorStop(1, 'transparent')
-  ctx.fillStyle = grd1
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.globalCompositeOperation = 'screen'
-  ctx.fillStyle = grd2
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
-  ctx.globalCompositeOperation = 'source-over'
-  ctx.font = 'bold 48px Bebas Neue, sans-serif'
-  ctx.fillStyle = 'rgba(255,255,255,0.15)'
-  ctx.textAlign = 'center'
-  ctx.fillText('MYSTERY', canvas.width/2, canvas.height/2 - 20)
-  ctx.fillText('REVEALED', canvas.width/2, canvas.height/2 + 40)
+// Category config
+const CATEGORIES = {
+  stadiums:  { name: 'STADIUM',  query: 'football stadium aerial view' },
+  supercars: { name: 'SUPERCAR', query: 'exotic supercar sports car' },
+  cities:    { name: 'CITY',     query: 'city skyline aerial night' },
+  nature:    { name: 'NATURE',   query: 'nature landscape mountains' },
+  random:    { name: 'MYSTERY',  query: 'abstract colorful art pattern' }
+}
+
+// ─── FETCH IMAGES FROM UNSPLASH ───────────────────────────────────
+async function fetchImages(query, category) {
+  if(categoryImages[category]) return categoryImages[category]
+  try {
+    const res = await fetch(
+      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&count=10&orientation=squarish`,
+      { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } }
+    )
+    const data = await res.json()
+    if(!Array.isArray(data)) return []
+    const images = data.map((img, i) => ({
+      id: img.id,
+      thumb: img.urls.thumb,
+      full: img.urls.regular,
+      name: img.alt_description || `Image ${i+1}`
+    }))
+    categoryImages[category] = images
+    return images
+  } catch(e) {
+    console.error('Unsplash error:', e)
+    return []
+  }
+}
+
+// ─── RENDER IMAGE SELECTOR ────────────────────────────────────────
+async function renderImageSelector(category) {
+  const selector = document.getElementById('image-selector')
+  selector.innerHTML = ''
+
+  // Show loading placeholders
+  for(let i = 0; i < 10; i++) {
+    const ph = document.createElement('div')
+    ph.className = 'img-loading'
+    ph.innerHTML = '<div class="img-loading-dot"></div>'
+    selector.appendChild(ph)
+  }
+
+  const query = CATEGORIES[category].query
+  const images = await fetchImages(query, category)
+
+  selector.innerHTML = ''
+  images.forEach((img, i) => {
+    const thumb = document.createElement('div')
+    thumb.className = 'img-thumb'
+    thumb.dataset.index = i
+    thumb.innerHTML = `
+      <img src="${img.thumb}" alt="${img.name}" loading="lazy" />
+      <span class="thumb-num">#${i+1}</span>
+    `
+    thumb.addEventListener('click', () => selectImage(img, i, category))
+    selector.appendChild(thumb)
+  })
+
+  // Auto-select first image
+  if(images.length > 0) selectImage(images[0], 0, category)
+}
+
+// ─── SELECT IMAGE ─────────────────────────────────────────────────
+async function selectImage(img, index, category) {
+  currentImageUrl = img.full
+  currentImageId = `${category}_${img.id}`
+
+  // Update thumbnail active state
+  document.querySelectorAll('.img-thumb').forEach((t, i) => {
+    t.classList.toggle('active', i === index)
+  })
+
+  // Update puzzle image - keep blurred
+  const puzzleImg = document.getElementById('puzzle-image')
+  puzzleImg.src = img.full
+  puzzleImg.classList.remove('fully-revealed')
+  puzzleImg.style.filter = 'blur(20px)'
+  puzzleImg.style.transform = 'scale(1.1)'
+
+  document.getElementById('current-img-name').textContent = `#${index+1}`
+  document.getElementById('puzzle-label-text').textContent = `100 tiles — $1 each`
+
+  // Load tile state for this image
+  await loadTileState(currentImageId)
+  buildGrid()
+  updateStats()
+}
+
+// ─── LOAD TILE STATE ──────────────────────────────────────────────
+async function loadTileState(imageId) {
+  try {
+    const { data } = await db.from('tiles').select('id').eq('revealed', true).eq('image_id', imageId)
+    revealedTiles = new Set((data || []).map(r => r.id))
+  } catch(e) {
+    revealedTiles = new Set()
+  }
 }
 
 // ─── BUILD GRID ───────────────────────────────────────────────────
@@ -308,6 +542,7 @@ function buildGrid() {
     grid.appendChild(tile)
   }
   highlightLastTile()
+  checkFullyRevealed()
 }
 
 function highlightLastTile() {
@@ -317,7 +552,16 @@ function highlightLastTile() {
   }
 }
 
-// ─── UPDATE UI ────────────────────────────────────────────────────
+function checkFullyRevealed() {
+  if(revealedTiles.size === TOTAL_TILES) {
+    const img = document.getElementById('puzzle-image')
+    img.classList.add('fully-revealed')
+    img.style.filter = 'blur(0px)'
+    img.style.transform = 'scale(1)'
+  }
+}
+
+// ─── UPDATE STATS ─────────────────────────────────────────────────
 function updateStats() {
   const revealed = revealedTiles.size
   const remaining = TOTAL_TILES - revealed
@@ -333,78 +577,32 @@ function updateStats() {
   document.getElementById('progress-fill').style.width = `${pct}%`
   document.getElementById('modal-remaining').textContent = remaining
   document.getElementById('modal-chance').textContent = `${(1/Math.max(remaining,1)*100).toFixed(2)}%`
-  document.getElementById('modal-prize').textContent = `$${prize} USDT`
+  document.getElementById('modal-prize').textContent = `$${prize}`
 }
 
-// ─── LOAD FROM SUPABASE ───────────────────────────────────────────
-async function loadGameState() {
-  try {
-    const { data, error } = await db.from('tiles').select('id').eq('revealed', true)
-    if(error) throw error
-    revealedTiles = new Set(data.map(r => r.id))
-    buildGrid()
-    updateStats()
-  } catch(e) {
-    console.error('Load error:', e)
-  }
-  document.getElementById('loading-overlay').classList.add('hidden')
-}
-
-// ─── REALTIME UPDATES ─────────────────────────────────────────────
-function subscribeRealtime() {
-  db.channel('tiles-changes')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tiles' }, payload => {
-      if(payload.new.revealed) {
-        const id = payload.new.id
-        revealedTiles.add(id)
-        const tile = document.querySelector(`[data-index="${id}"]`)
-        if(tile) {
-          tile.style.transition = 'all 0.6s ease'
-          tile.style.transform = 'scale(1.1)'
-          tile.style.boxShadow = '0 0 30px rgba(240,224,64,0.6)'
-          setTimeout(() => {
-            tile.classList.add('revealed')
-            tile.style.transform = ''
-            tile.style.boxShadow = ''
-          }, 300)
-        }
-        addActivity(`Tile #${id}`, id)
-        updateStats()
-        highlightLastTile()
-        if(revealedTiles.size === TOTAL_TILES) setTimeout(showWinner, 800)
-      }
-    })
-    .subscribe()
-}
-
-// ─── ACTIVITY FEED ────────────────────────────────────────────────
-function addActivity(wallet, tileIndex) {
-  const list = document.getElementById('activity-list')
-  if(list.querySelector('div[style]')) list.innerHTML = ''
-  const item = document.createElement('div')
-  item.className = 'activity-item'
-  const shortW = wallet.length > 12 ? wallet.slice(0,6)+'...'+wallet.slice(-4) : wallet
-  item.innerHTML = `
-    <div class="activity-dot"></div>
-    <div class="activity-text"><b>${shortW}</b> revealed tile #${tileIndex}</div>
-    <div class="activity-time">just now</div>
-  `
-  list.insertBefore(item, list.firstChild)
-  if(list.children.length > 10) list.removeChild(list.lastChild)
-}
+// ─── CATEGORY BUTTONS ─────────────────────────────────────────────
+document.querySelectorAll('.cat-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    currentCategory = btn.dataset.cat
+    document.getElementById('current-cat-name').textContent = CATEGORIES[currentCategory].name
+    document.getElementById('loading-text').textContent = `Loading ${currentCategory}...`
+    document.getElementById('loading-overlay').classList.remove('hidden')
+    await renderImageSelector(currentCategory)
+    document.getElementById('loading-overlay').classList.add('hidden')
+  })
+})
 
 // ─── MODALS ───────────────────────────────────────────────────────
 function openBuyModal() {
+  if(!currentImageUrl) { alert('Please select an image first!'); return }
   updateStats()
   document.getElementById('buy-modal').classList.add('active')
 }
 
 document.getElementById('buy-btn').addEventListener('click', openBuyModal)
-
-document.getElementById('modal-close').addEventListener('click', () => {
-  document.getElementById('buy-modal').classList.remove('active')
-})
-
+document.getElementById('modal-close').addEventListener('click', () => document.getElementById('buy-modal').classList.remove('active'))
 document.getElementById('payment-close').addEventListener('click', () => {
   document.getElementById('payment-modal').classList.remove('active')
   if(pollInterval) clearInterval(pollInterval)
@@ -421,10 +619,7 @@ document.querySelectorAll('.coin-btn').forEach(btn => {
 // ─── CREATE PAYMENT ───────────────────────────────────────────────
 document.getElementById('confirm-pay').addEventListener('click', async () => {
   const wallet = document.getElementById('wallet-input').value.trim()
-  if(!wallet) {
-    document.getElementById('wallet-input').style.borderColor = 'var(--accent2)'
-    return
-  }
+  if(!wallet) { document.getElementById('wallet-input').style.borderColor = 'var(--accent2)'; return }
   document.getElementById('wallet-input').style.borderColor = ''
 
   const btn = document.getElementById('confirm-pay')
@@ -432,7 +627,6 @@ document.getElementById('confirm-pay').addEventListener('click', async () => {
   btn.textContent = 'Creating payment...'
 
   try {
-    // Pick random unrevealed tile
     const unrevealed = []
     for(let i = 0; i < TOTAL_TILES; i++) {
       if(!revealedTiles.has(i)) unrevealed.push(i)
@@ -440,28 +634,21 @@ document.getElementById('confirm-pay').addEventListener('click', async () => {
     if(unrevealed.length === 0) { alert('All tiles revealed!'); return }
     const tileId = unrevealed[Math.floor(Math.random() * unrevealed.length)]
 
-    // Create payment via our backend API
     const response = await fetch('/api/create-payment', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         pay_currency: selectedCoin,
         tile_id: tileId,
+        image_id: currentImageId,
         wallet: wallet
       })
     })
-
     const payment = await response.json()
+    if(!payment.pay_address) throw new Error(payment.error || 'Failed')
 
-    if(!payment.pay_address) throw new Error('Payment creation failed')
-
-    currentPaymentId = payment.payment_id
-
-    // Save pending payment to Supabase
-    await db.from('tiles').update({
-      payment_id: payment.payment_id,
-      wallet: wallet
-    }).eq('id', tileId)
+    // Save to Supabase
+    await db.from('tiles').update({ payment_id: payment.payment_id, wallet }).eq('id', tileId).eq('image_id', currentImageId)
 
     // Show payment modal
     document.getElementById('buy-modal').classList.remove('active')
@@ -470,33 +657,28 @@ document.getElementById('confirm-pay').addEventListener('click', async () => {
     document.getElementById('pay-address').textContent = payment.pay_address
     document.getElementById('payment-modal').classList.add('active')
 
-    // Copy button
     document.getElementById('copy-address-btn').onclick = () => {
       navigator.clipboard.writeText(payment.pay_address)
       document.getElementById('copy-address-btn').textContent = 'Copied! ✓'
       setTimeout(() => document.getElementById('copy-address-btn').textContent = 'Copy Address', 2000)
     }
 
-    // Poll payment status
     pollPaymentStatus(payment.payment_id, tileId, wallet)
-
   } catch(e) {
-    console.error('Payment error:', e)
-    alert('Error creating payment. Check your API key.')
+    console.error(e)
+    alert('Error: ' + e.message)
   }
 
   btn.disabled = false
   btn.textContent = 'PAY & REVEAL'
 })
 
-// ─── POLL PAYMENT STATUS ──────────────────────────────────────────
+// ─── POLL PAYMENT ─────────────────────────────────────────────────
 function pollPaymentStatus(paymentId, tileId, wallet) {
   if(pollInterval) clearInterval(pollInterval)
   pollInterval = setInterval(async () => {
     try {
-      const res = await fetch(`https://api.nowpayments.io/v1/payment/${paymentId}`, {
-        headers: { 'x-api-key': NOWPAYMENTS_KEY }
-      })
+      const res = await fetch(`/api/check-payment?id=${paymentId}`)
       const data = await res.json()
       const statusEl = document.getElementById('pay-status')
 
@@ -504,21 +686,13 @@ function pollPaymentStatus(paymentId, tileId, wallet) {
         clearInterval(pollInterval)
         statusEl.innerHTML = '<span class="status-badge status-confirmed">✓ Confirmed!</span>'
 
-        // Reveal tile in Supabase
         await db.from('tiles').update({
-          revealed: true,
-          wallet: wallet,
-          payment_id: paymentId,
-          revealed_at: new Date().toISOString()
-        }).eq('id', tileId)
+          revealed: true, wallet, payment_id: paymentId, revealed_at: new Date().toISOString()
+        }).eq('id', tileId).eq('image_id', currentImageId)
 
-        // Update prize pool
-        const { data: gs } = await db.from('game_state').select('total_paid').eq('id', 1).single()
-        await db.from('game_state').update({ total_paid: (gs?.total_paid || 0) + TILE_PRICE }).eq('id', 1)
-
-        setTimeout(() => {
-          document.getElementById('payment-modal').classList.remove('active')
-        }, 2000)
+        revealTileUI(tileId, wallet)
+        creditReferrer()
+        setTimeout(() => document.getElementById('payment-modal').classList.remove('active'), 2000)
 
       } else if(data.payment_status === 'failed' || data.payment_status === 'expired') {
         clearInterval(pollInterval)
@@ -526,16 +700,64 @@ function pollPaymentStatus(paymentId, tileId, wallet) {
       } else {
         statusEl.innerHTML = `<span class="status-badge status-waiting">${data.payment_status}...</span>`
       }
-    } catch(e) {
-      console.error('Poll error:', e)
-    }
-  }, 10000) // Check every 10 seconds
+    } catch(e) { console.error(e) }
+  }, 10000)
+}
+
+// ─── REVEAL TILE UI ───────────────────────────────────────────────
+function revealTileUI(index, wallet) {
+  revealedTiles.add(index)
+  const tile = document.querySelector(`[data-index="${index}"]`)
+  if(tile) {
+    tile.style.transition = 'all 0.6s ease'
+    tile.style.transform = 'scale(1.1)'
+    tile.style.boxShadow = '0 0 30px rgba(240,224,64,0.6)'
+    setTimeout(() => {
+      tile.classList.add('revealed')
+      tile.style.transform = ''
+      tile.style.boxShadow = ''
+    }, 300)
+  }
+  addActivity(wallet, index)
+  updateStats()
+  highlightLastTile()
+  if(revealedTiles.size === TOTAL_TILES) {
+    checkFullyRevealed()
+    setTimeout(showWinner, 800)
+  }
+}
+
+// ─── REALTIME ─────────────────────────────────────────────────────
+function subscribeRealtime() {
+  db.channel('tiles-changes')
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tiles' }, payload => {
+      if(payload.new.revealed && payload.new.image_id === currentImageId) {
+        revealTileUI(payload.new.id, payload.new.wallet || 'anonymous')
+      }
+    }).subscribe()
+}
+
+// ─── ACTIVITY ─────────────────────────────────────────────────────
+function addActivity(wallet, tileIndex) {
+  const list = document.getElementById('activity-list')
+  const noActivity = list.querySelector('div[style]')
+  if(noActivity) list.innerHTML = ''
+  const short = wallet ? wallet.slice(0,6)+'...'+wallet.slice(-4) : 'anonymous'
+  const item = document.createElement('div')
+  item.className = 'activity-item'
+  item.innerHTML = `
+    <div class="activity-dot"></div>
+    <div class="activity-text"><b>${short}</b> revealed tile #${tileIndex}</div>
+    <div class="activity-time">now</div>
+  `
+  list.insertBefore(item, list.firstChild)
+  if(list.children.length > 10) list.removeChild(list.lastChild)
 }
 
 // ─── WINNER ───────────────────────────────────────────────────────
 function showWinner() {
   spawnConfetti()
-  setTimeout(() => alert('🏆 ALL TILES REVEALED! The last revealer wins the prize!'), 500)
+  setTimeout(() => alert('🏆 ALL TILES REVEALED! The image is now visible! The last revealer wins the prize!'), 500)
 }
 
 function spawnConfetti() {
@@ -552,14 +774,199 @@ function spawnConfetti() {
   }
 }
 
+
+// ─── MENU ─────────────────────────────────────────────────────────
+function toggleMenu() {
+  const menu = document.getElementById('side-menu')
+  const overlay = document.getElementById('menu-overlay')
+  const burger = document.getElementById('hamburger')
+  menu.classList.toggle('open')
+  overlay.classList.toggle('open')
+  burger.classList.toggle('open')
+}
+
+function closeMenu() {
+  document.getElementById('side-menu').classList.remove('open')
+  document.getElementById('menu-overlay').classList.remove('open')
+  document.getElementById('hamburger').classList.remove('open')
+}
+
+document.getElementById('menu-overlay').addEventListener('click', closeMenu)
+
+function selectCoffee(btn, amount) {
+  document.querySelectorAll('.coffee-amount-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+}
+
+
+// ─── REFERRAL SYSTEM ──────────────────────────────────────────────
+let myRefCode = ''
+let freeTiles = 0
+
+function initReferral() {
+  // Get or generate ref code based on timestamp + random
+  let stored = localStorage.getItem('hd_ref_code')
+  if(!stored) {
+    stored = 'hd_' + Math.random().toString(36).slice(2, 10)
+    localStorage.setItem('hd_ref_code', stored)
+  }
+  myRefCode = stored
+
+  // Load free tiles count
+  freeTiles = parseInt(localStorage.getItem('hd_free_tiles') || '0')
+  updateFreeTilesUI()
+
+  // Set referral link
+  const refUrl = `${window.location.origin}${window.location.pathname}?ref=${myRefCode}`
+  document.getElementById('ref-link-input').value = refUrl
+
+  // Copy button
+  document.getElementById('ref-copy-btn').addEventListener('click', () => {
+    navigator.clipboard.writeText(refUrl)
+    const btn = document.getElementById('ref-copy-btn')
+    btn.textContent = 'COPIED! ✓'
+    setTimeout(() => btn.textContent = 'COPY LINK', 2000)
+  })
+
+  // Check if this page was opened via referral
+  const urlParams = new URLSearchParams(window.location.search)
+  const refFrom = urlParams.get('ref')
+  if(refFrom && refFrom !== myRefCode) {
+    // Store who referred this user
+    localStorage.setItem('hd_referred_by', refFrom)
+  }
+
+  // Listen for referral rewards from Supabase
+  db.channel('referral-rewards')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'referral_rewards' }, payload => {
+      if(payload.new.ref_code === myRefCode) {
+        freeTiles++
+        localStorage.setItem('hd_free_tiles', freeTiles)
+        updateFreeTilesUI()
+        showFreeTileToast()
+      }
+    }).subscribe()
+}
+
+function updateFreeTilesUI() {
+  document.getElementById('free-tiles-count').textContent = freeTiles
+  const notice = document.getElementById('free-tile-notice')
+  const availableEl = document.getElementById('free-tiles-available')
+  if(freeTiles > 0 && notice) {
+    notice.style.display = 'block'
+    if(availableEl) availableEl.textContent = freeTiles
+  }
+}
+
+function showFreeTileToast() {
+  const toast = document.getElementById('free-tile-toast')
+  toast.classList.add('show')
+  setTimeout(() => toast.classList.remove('show'), 4000)
+}
+
+async function useFreeeTile() {
+  if(freeTiles <= 0) return
+  if(!currentImageUrl) { alert('Please select an image first!'); return }
+
+  const unrevealed = []
+  for(let i = 0; i < TOTAL_TILES; i++) {
+    if(!revealedTiles.has(i)) unrevealed.push(i)
+  }
+  if(unrevealed.length === 0) { alert('All tiles revealed!'); return }
+
+  const tileId = unrevealed[Math.floor(Math.random() * unrevealed.length)]
+
+  // Use free tile
+  freeTiles--
+  localStorage.setItem('hd_free_tiles', freeTiles)
+  updateFreeTilesUI()
+
+  // Mark tile as revealed in Supabase
+  await db.from('tiles').update({
+    revealed: true,
+    wallet: 'free_tile',
+    revealed_at: new Date().toISOString()
+  }).eq('id', tileId).eq('image_id', currentImageId)
+
+  document.getElementById('buy-modal').classList.remove('active')
+  revealTileUI(tileId, 'free_tile')
+}
+
+// Credit referrer when payment is made
+async function creditReferrer() {
+  const referredBy = localStorage.getItem('hd_referred_by')
+  if(!referredBy) return
+  try {
+    await db.from('referral_rewards').insert({ ref_code: referredBy, rewarded_at: new Date().toISOString() })
+    localStorage.removeItem('hd_referred_by') // Only credit once
+  } catch(e) { console.error('Referral credit error:', e) }
+}
+
 // ─── START ────────────────────────────────────────────────────────
 window.addEventListener('load', async () => {
-  drawHiddenImage()
-  await loadGameState()
+  initReferral()
+  document.getElementById('loading-text').textContent = 'Loading images...'
+  await renderImageSelector('stadiums')
   subscribeRealtime()
+  document.getElementById('loading-overlay').classList.add('hidden')
 })
-
-window.addEventListener('resize', drawHiddenImage)
 </script>
+
+<!-- PRIVACY MODAL -->
+<div class="modal-overlay" id="privacy-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('privacy-modal').classList.remove('active')">✕</button>
+    <h2>Privacy Policy</h2>
+    <p>HiddenDrop does not collect personal information. The only data we store is your crypto wallet address (which you provide voluntarily) to send prizes. We do not share your data with third parties. Payments are processed by NOWPayments. Game state is stored on Supabase.</p>
+  </div>
+</div>
+
+<!-- SECURITY MODAL -->
+<div class="modal-overlay" id="security-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('security-modal').classList.remove('active')">✕</button>
+    <h2>Security</h2>
+    <p>All payments are processed through NOWPayments, a trusted crypto payment processor. We never store your private keys or payment details. Prize payouts are sent directly to the wallet address you provide. Tile state is recorded on Supabase with real-time verification.</p>
+  </div>
+</div>
+
+<!-- HOW IT WORKS MODAL -->
+<div class="modal-overlay" id="howto-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('howto-modal').classList.remove('active')">✕</button>
+    <h2>How it Works</h2>
+    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $2 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
+  </div>
+</div>
+
+<!-- COFFEE MODAL -->
+<div class="modal-overlay" id="coffee-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('coffee-modal').classList.remove('active')">✕</button>
+    <h2>☕ Buy Me a Coffee</h2>
+    <p>Enjoying HiddenDrop? Support the developer with a small crypto donation. Every coffee keeps the server running!</p>
+    <div class="coffee-amounts">
+      <button class="coffee-amount-btn active" data-amount="1" onclick="selectCoffee(this,'1')">
+        <span class="coffee-emoji">☕</span>$1
+      </button>
+      <button class="coffee-amount-btn" data-amount="3" onclick="selectCoffee(this,'3')">
+        <span class="coffee-emoji">☕☕</span>$3
+      </button>
+      <button class="coffee-amount-btn" data-amount="5" onclick="selectCoffee(this,'5')">
+        <span class="coffee-emoji">☕☕☕</span>$5
+      </button>
+      <button class="coffee-amount-btn" data-amount="10" onclick="selectCoffee(this,'10')">
+        <span class="coffee-emoji">🏆</span>$10
+      </button>
+    </div>
+    <div class="coffee-address-box">
+      <div class="coffee-network">USDT · TRC20 Network</div>
+      <div class="coffee-address" id="coffee-wallet-address">حط هون عنوان محفظتك</div>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
+    </div>
+    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
+  </div>
+</div>
+
 </body>
 </html>
