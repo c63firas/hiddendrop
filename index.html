@@ -452,12 +452,10 @@
   </div>
 </div>
 
-<script>
-// ─── CONFIG ───────────────────────────────────────────────────────
+<script>// ─── CONFIG ───────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
 const SUPABASE_KEY = 'sb_publishable_LSoyu8srkpRUCtTYn05zmQ_H70MTqxd'
 const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
-
 // ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -1031,8 +1029,7 @@ function selectCoffee(btn, amount) {
 let myRefCode = ''
 let freeTiles = 0
 
-function initWallet()
-  initReferral() {
+function initReferral() {
   // Get or generate ref code based on timestamp + random
   let stored = localStorage.getItem('hd_ref_code')
   if(!stored) {
