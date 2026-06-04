@@ -56,9 +56,8 @@
     .image-selector::-webkit-scrollbar { height: 3px; }
     .image-selector::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     .img-thumb { width: 80px; height: 60px; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; overflow: hidden; flex-shrink: 0; transition: all 0.2s; position: relative; }
-    .img-thumb img { width: 100%; height: 100%; object-fit: cover; filter: blur(6px); transform: scale(1.1); transition: all 0.2s; }
+    .img-thumb img { width: 100%; height: 100%; object-fit: cover; filter: blur(8px); transform: scale(1.1); }
     .img-thumb:hover { border-color: var(--accent); }
-    .img-thumb:hover img { filter: blur(0px); transform: scale(1); }
     .img-thumb.active { border-color: var(--accent); box-shadow: 0 0 12px rgba(240,224,64,0.4); }
     .img-thumb .thumb-num { position: absolute; bottom: 2px; right: 4px; font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--accent); text-shadow: 0 0 4px #000; }
     .img-loading { width: 80px; height: 60px; background: var(--surface); border: 2px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -407,7 +406,7 @@
     <h2>Reveal a Tile</h2>
     <p>Pay $2 USDT to reveal a random tile. The image stays blurred until ALL tiles are revealed. Last tile wins the prize!</p>
     <div class="tile-info">
-      <div><span>Price</span><span>$1.00 USDT</span></div>
+      <div><span>Price</span><span>$2.00 USDT</span></div>
       <div><span>Tiles remaining</span><span id="modal-remaining">100</span></div>
       <div><span>Win chance</span><span id="modal-chance">1%</span></div>
       <div><span>Prize pool</span><span id="modal-prize">$0.00</span></div>
@@ -942,13 +941,18 @@ async function connectWalletAddress(address) {
   myWallet = address
   localStorage.setItem('hd_wallet', address)
 
-  // Load or create user in Supabase
-  const { data } = await db.from('users').select('*').eq('wallet', address).single()
-  if(!data) {
-    await db.from('users').insert({ wallet: address, balance: 0 })
+  try {
+    // Load or create user in Supabase
+    const { data, error } = await db.from('users').select('*').eq('wallet', address).single()
+    if(error || !data) {
+      await db.from('users').insert({ wallet: address, balance: 0 })
+      myBalance = 0
+    } else {
+      myBalance = parseFloat(data.balance) || 0
+    }
+  } catch(e) {
+    console.error('Connect wallet error:', e)
     myBalance = 0
-  } else {
-    myBalance = parseFloat(data.balance) || 0
   }
 
   updateWalletUI()
