@@ -546,7 +546,7 @@
     </div>
     <div class="coffee-address-box">
       <div class="coffee-network">USDT · TRC20 Network</div>
-      <div class="coffee-address" id="coffee-wallet-address">حط هون عنوان محفظتك</div>
+      <div class="coffee-address" id="coffee-wallet-address">TCgzzpfsGqEovDxkDRXWQHu4HV9Xh2QhZN</div>
       <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
     </div>
     <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
@@ -557,10 +557,9 @@
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────
-const SUPABASE_URL = 'حط هون الـ Project URL'
-const SUPABASE_KEY = 'حط هون الـ anon public key'
-const UNSPLASH_KEY = 'حط هون الـ Unsplash Access Key'
-
+const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5lYWdia3JtaHllY25wb25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDYxNDUsImV4cCI6MjA5NTkyMjE0NX0.m_Sl1-8pmg_RJRJlk6vlv5bZb3aMdFs-rx6Rd0y4n_c'
+const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
 // ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
