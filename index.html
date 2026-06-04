@@ -555,10 +555,11 @@
 
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────
+  // ─── CONFIG ───────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5lYWdia3JtaHllY25wb25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDYxNDUsImV4cCI6MjA5NTkyMjE0NX0.m_Sl1-8pmg_RJRJlk6vlv5bZb3aMdFs-rx6Rd0y4n_c'
 const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
+const API_URL = 'https://hiddendrop.onrender.com'
 // ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -784,7 +785,7 @@ document.getElementById('confirm-pay').addEventListener('click', async () => {
     if(unrevealed.length === 0) { alert('All tiles revealed!'); return }
     const tileId = unrevealed[Math.floor(Math.random() * unrevealed.length)]
 
-    const response = await fetch('/api/create-payment', {
+    const response = await fetch(`${API_URL}/api/create-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -828,7 +829,7 @@ function pollPaymentStatus(paymentId, tileId, wallet) {
   if(pollInterval) clearInterval(pollInterval)
   pollInterval = setInterval(async () => {
     try {
-      const res = await fetch(`/api/check-payment?id=${paymentId}`)
+      const res = await fetch(`${API_URL}/api/check-payment?id=${paymentId}`)
       const data = await res.json()
       const statusEl = document.getElementById('pay-status')
 
@@ -1020,7 +1021,7 @@ document.getElementById('confirm-deposit-btn').addEventListener('click', async (
   btn.textContent = 'Creating payment...'
 
   try {
-    const response = await fetch('/api/create-payment', {
+    const response = await fetch(`${API_URL}/api/create-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -1062,7 +1063,7 @@ function pollDepositPayment(paymentId, amount) {
   if(depositPollInterval) clearInterval(depositPollInterval)
   depositPollInterval = setInterval(async () => {
     try {
-      const res = await fetch(`/api/check-payment?id=${paymentId}`)
+      const res = await fetch(`${API_URL}/api/check-payment?id=${paymentId}`)
       const data = await res.json()
       const statusEl = document.getElementById('pay-status')
 
