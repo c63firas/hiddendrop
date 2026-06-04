@@ -204,6 +204,39 @@
     .free-tile-toast.show { display: block; }
     @keyframes slideInRight { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .discount-badge { display: inline-block; background: var(--accent2); color: #fff; font-family: 'Space Mono', monospace; font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+
+    /* WALLET SYSTEM */
+    .wallet-bar { position: relative; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 40px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .wallet-info { display: flex; align-items: center; gap: 12px; }
+    .wallet-address-short { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--muted); }
+    .wallet-address-short b { color: var(--text); }
+    .wallet-balance { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--accent); font-weight: 700; }
+    .wallet-balance span { color: var(--muted); font-size: 0.65rem; font-weight: 400; }
+    .btn-deposit { padding: 8px 16px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
+    .btn-deposit:hover { background: #fff; }
+    .btn-connect { padding: 8px 16px; background: none; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.2s; }
+    .btn-connect:hover { background: rgba(240,224,64,0.1); }
+
+    /* CONNECT MODAL */
+    .connect-modal h2 { color: var(--accent); }
+    .wallet-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .wallet-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
+    .wallet-option:hover { border-color: var(--accent); color: var(--accent); }
+    .wallet-option .w-icon { font-size: 1.3rem; }
+    .manual-wallet-wrap { margin-top: 16px; }
+    .manual-wallet-wrap label { display: block; font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 8px; }
+    .manual-wallet-wrap input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.75rem; outline: none; transition: border-color 0.2s; }
+    .manual-wallet-wrap input:focus { border-color: var(--accent); }
+
+    /* DEPOSIT MODAL */
+    .deposit-modal h2 { color: var(--accent); }
+    .deposit-amounts { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .deposit-btn { flex: 1; min-width: 70px; padding: 12px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; text-align: center; }
+    .deposit-btn:hover, .deposit-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,224,64,0.05); }
+    .deposit-btn b { display: block; font-size: 1rem; color: var(--text); margin-bottom: 2px; }
+    .balance-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-family: 'Space Mono', monospace; font-size: 0.75rem; }
+    .balance-preview div { display: flex; justify-content: space-between; padding: 3px 0; color: var(--muted); }
+    .balance-preview div span:last-child { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -253,6 +286,22 @@
   <span class="ticker-inner">🔒 HIDDENDROP — REVEAL TILES TO UNCOVER THE MYSTERY IMAGE — LAST TILE WINS THE PRIZE — PAY WITH CRYPTO — 🏆 WHO WILL WIN? 🔒</span>
 </div>
 
+
+
+<!-- WALLET BAR -->
+<div class="wallet-bar" id="wallet-bar">
+  <div class="wallet-info" id="wallet-info-connected" style="display:none;">
+    <div class="wallet-address-short">👤 <b id="wallet-short">0x00...0000</b></div>
+    <div class="wallet-balance" id="wallet-balance-display">$0.00 <span>USDT</span></div>
+  </div>
+  <div id="wallet-info-disconnected">
+    <span style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted);">Connect your wallet to play</span>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="btn-connect" id="connect-wallet-btn">🔗 CONNECT WALLET</button>
+    <button class="btn-deposit" id="deposit-btn" style="display:none;">+ DEPOSIT</button>
+  </div>
+</div>
 
 <!-- REFERRAL BAR -->
 <div class="referral-bar" id="referral-bar">
@@ -405,9 +454,9 @@
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_LSoyu8srkpRUCtTYn05zmQ_H70MTqxd'
-const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
+const SUPABASE_URL = 'حط هون الـ Project URL'
+const SUPABASE_KEY = 'حط هون الـ anon public key'
+const UNSPLASH_KEY = 'حط هون الـ Unsplash Access Key'
 
 // ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
@@ -775,6 +824,185 @@ function spawnConfetti() {
 }
 
 
+
+// ─── WALLET SYSTEM ────────────────────────────────────────────────
+let myWallet = ''
+let myBalance = 0
+let depositAmount = 5
+let depositPollInterval = null
+
+function initWallet() {
+  const stored = localStorage.getItem('hd_wallet')
+  if(stored) connectWalletAddress(stored)
+}
+
+async function connectWalletAddress(address) {
+  myWallet = address
+  localStorage.setItem('hd_wallet', address)
+
+  // Load or create user in Supabase
+  const { data } = await db.from('users').select('*').eq('wallet', address).single()
+  if(!data) {
+    await db.from('users').insert({ wallet: address, balance: 0 })
+    myBalance = 0
+  } else {
+    myBalance = parseFloat(data.balance) || 0
+  }
+
+  updateWalletUI()
+  document.getElementById('connect-modal').classList.remove('active')
+
+  // Also set wallet input in buy modal
+  document.getElementById('wallet-input').value = address
+}
+
+function updateWalletUI() {
+  const short = myWallet.slice(0,6) + '...' + myWallet.slice(-4)
+  document.getElementById('wallet-short').textContent = short
+  document.getElementById('wallet-balance-display').innerHTML = `$${myBalance.toFixed(2)} <span>USDT</span>`
+  document.getElementById('wallet-info-connected').style.display = 'flex'
+  document.getElementById('wallet-info-disconnected').style.display = 'none'
+  document.getElementById('connect-wallet-btn').style.display = 'none'
+  document.getElementById('deposit-btn').style.display = 'block'
+
+  // Update deposit modal balance preview
+  document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
+  document.getElementById('dep-new-balance').textContent = `$${(myBalance + depositAmount).toFixed(2)}`
+
+  // Update buy button
+  const buyBtn = document.getElementById('buy-btn')
+  if(myBalance >= 2) {
+    buyBtn.textContent = 'REVEAL A TILE ($2)'
+    buyBtn.disabled = false
+  } else {
+    buyBtn.textContent = 'DEPOSIT TO PLAY'
+    buyBtn.disabled = false
+  }
+}
+
+function selectDeposit(btn, amount) {
+  document.querySelectorAll('.deposit-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  depositAmount = amount
+  document.getElementById('dep-amount-preview').textContent = `$${amount}.00`
+  document.getElementById('dep-new-balance').textContent = `$${(myBalance + amount).toFixed(2)}`
+}
+
+// Connect wallet button
+document.getElementById('connect-wallet-btn').addEventListener('click', () => {
+  document.getElementById('connect-modal').classList.add('active')
+})
+
+document.getElementById('confirm-connect-btn').addEventListener('click', () => {
+  const addr = document.getElementById('connect-wallet-input').value.trim()
+  if(!addr) { document.getElementById('connect-wallet-input').style.borderColor = 'var(--accent2)'; return }
+  connectWalletAddress(addr)
+})
+
+// Deposit button
+document.getElementById('deposit-btn').addEventListener('click', () => {
+  document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
+  document.getElementById('dep-new-balance').textContent = `$${(myBalance + depositAmount).toFixed(2)}`
+  document.getElementById('deposit-modal').classList.add('active')
+})
+
+document.getElementById('confirm-deposit-btn').addEventListener('click', async () => {
+  if(!myWallet) { alert('Connect your wallet first!'); return }
+
+  const btn = document.getElementById('confirm-deposit-btn')
+  btn.disabled = true
+  btn.textContent = 'Creating payment...'
+
+  try {
+    const response = await fetch('/api/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pay_currency: selectedCoin,
+        amount: depositAmount,
+        wallet: myWallet,
+        type: 'deposit'
+      })
+    })
+    const payment = await response.json()
+    if(!payment.pay_address) throw new Error(payment.error || 'Failed')
+
+    // Close deposit modal, show payment modal
+    document.getElementById('deposit-modal').classList.remove('active')
+    document.getElementById('pay-amount').textContent = `${payment.pay_amount} ${selectedCoin.toUpperCase()}`
+    document.getElementById('pay-network').textContent = selectedCoin.toUpperCase()
+    document.getElementById('pay-address').textContent = payment.pay_address
+    document.getElementById('pay-status').innerHTML = '<span class="status-badge status-waiting">Waiting...</span>'
+    document.getElementById('payment-modal').classList.add('active')
+
+    document.getElementById('copy-address-btn').onclick = () => {
+      navigator.clipboard.writeText(payment.pay_address)
+      document.getElementById('copy-address-btn').textContent = 'Copied! ✓'
+      setTimeout(() => document.getElementById('copy-address-btn').textContent = 'Copy Address', 2000)
+    }
+
+    // Poll deposit payment
+    pollDepositPayment(payment.payment_id, depositAmount)
+
+  } catch(e) {
+    alert('Error: ' + e.message)
+  }
+
+  btn.disabled = false
+  btn.textContent = 'DEPOSIT & PLAY'
+})
+
+function pollDepositPayment(paymentId, amount) {
+  if(depositPollInterval) clearInterval(depositPollInterval)
+  depositPollInterval = setInterval(async () => {
+    try {
+      const res = await fetch(`/api/check-payment?id=${paymentId}`)
+      const data = await res.json()
+      const statusEl = document.getElementById('pay-status')
+
+      if(data.payment_status === 'finished' || data.payment_status === 'confirmed') {
+        clearInterval(depositPollInterval)
+        statusEl.innerHTML = '<span class="status-badge status-confirmed">✓ Confirmed!</span>'
+
+        // Add balance to user in Supabase
+        const newBalance = myBalance + amount
+        await db.from('users').update({ 
+          balance: newBalance,
+          total_deposited: db.rpc ? newBalance : newBalance
+        }).eq('wallet', myWallet)
+
+        myBalance = newBalance
+        updateWalletUI()
+
+        setTimeout(() => {
+          document.getElementById('payment-modal').classList.remove('active')
+        }, 2000)
+
+      } else if(data.payment_status === 'failed' || data.payment_status === 'expired') {
+        clearInterval(depositPollInterval)
+        statusEl.innerHTML = '<span class="status-badge status-error">Failed / Expired</span>'
+      } else {
+        statusEl.innerHTML = `<span class="status-badge status-waiting">${data.payment_status}...</span>`
+      }
+    } catch(e) { console.error(e) }
+  }, 10000)
+}
+
+// Override buy button to use balance
+document.getElementById('buy-btn').addEventListener('click', () => {
+  if(!myWallet) {
+    document.getElementById('connect-modal').classList.add('active')
+    return
+  }
+  if(myBalance < 2) {
+    document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
+    document.getElementById('dep-new-balance').textContent = `$${(myBalance + depositAmount).toFixed(2)}`
+    document.getElementById('deposit-modal').classList.add('active')
+    return
+  }
+  openBuyModal()
+})
+
 // ─── MENU ─────────────────────────────────────────────────────────
 function toggleMenu() {
   const menu = document.getElementById('side-menu')
@@ -803,7 +1031,8 @@ function selectCoffee(btn, amount) {
 let myRefCode = ''
 let freeTiles = 0
 
-function initReferral() {
+function initWallet()
+  initReferral() {
   // Get or generate ref code based on timestamp + random
   let stored = localStorage.getItem('hd_ref_code')
   if(!stored) {
@@ -904,6 +1133,7 @@ async function creditReferrer() {
 
 // ─── START ────────────────────────────────────────────────────────
 window.addEventListener('load', async () => {
+  initWallet()
   initReferral()
   document.getElementById('loading-text').textContent = 'Loading images...'
   await renderImageSelector('stadiums')
@@ -911,6 +1141,52 @@ window.addEventListener('load', async () => {
   document.getElementById('loading-overlay').classList.add('hidden')
 })
 </script>
+
+
+<!-- CONNECT WALLET MODAL -->
+<div class="modal-overlay" id="connect-modal">
+  <div class="modal connect-modal">
+    <button class="modal-close" onclick="document.getElementById('connect-modal').classList.remove('active')">✕</button>
+    <h2>Connect Wallet</h2>
+    <p>Enter your crypto wallet address to save your balance and winnings across sessions.</p>
+    <div class="manual-wallet-wrap">
+      <label>YOUR WALLET ADDRESS</label>
+      <input type="text" id="connect-wallet-input" placeholder="0x... or TRC20 address" />
+    </div>
+    <br/>
+    <button class="btn-confirm" id="confirm-connect-btn">CONNECT</button>
+  </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div class="modal-overlay" id="deposit-modal">
+  <div class="modal deposit-modal">
+    <button class="modal-close" onclick="document.getElementById('deposit-modal').classList.remove('active')">✕</button>
+    <h2>Deposit Funds</h2>
+    <p>Add USDT to your balance and use it to reveal tiles anytime.</p>
+    <div class="deposit-amounts">
+      <button class="deposit-btn active" data-amount="5" onclick="selectDeposit(this,5)"><b>$5</b>5 tiles</button>
+      <button class="deposit-btn" data-amount="10" onclick="selectDeposit(this,10)"><b>$10</b>10 tiles</button>
+      <button class="deposit-btn" data-amount="20" onclick="selectDeposit(this,20)"><b>$20</b>20 tiles</button>
+      <button class="deposit-btn" data-amount="50" onclick="selectDeposit(this,50)"><b>$50</b>50 tiles</button>
+    </div>
+    <div class="balance-preview">
+      <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
+      <div><span>Depositing</span><span id="dep-amount-preview">$5.00</span></div>
+      <div><span>New balance</span><span id="dep-new-balance">$5.00</span></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
+      <div class="coin-select">
+        <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
+        <button class="coin-btn" data-coin="btc">BTC</button>
+        <button class="coin-btn" data-coin="eth">ETH</button>
+        <button class="coin-btn" data-coin="trx">TRX</button>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
+  </div>
+</div>
 
 <!-- PRIVACY MODAL -->
 <div class="modal-overlay" id="privacy-modal">
@@ -961,7 +1237,7 @@ window.addEventListener('load', async () => {
     </div>
     <div class="coffee-address-box">
       <div class="coffee-network">USDT · TRC20 Network</div>
-      <div class="coffee-address" id="coffee-wallet-address">TCgzzpfsGqEovDxkDRXWQHu4HV9Xh2QhZN</div>
+      <div class="coffee-address" id="coffee-wallet-address">حط هون عنوان محفظتك</div>
       <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
     </div>
     <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
