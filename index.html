@@ -452,10 +452,115 @@
   </div>
 </div>
 
-<script>// ─── CONFIG ───────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_LSoyu8srkpRUCtTYn05zmQ_H70MTqxd'
-const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
+<!-- CONNECT WALLET MODAL -->
+<div class="modal-overlay" id="connect-modal">
+  <div class="modal connect-modal">
+    <button class="modal-close" onclick="document.getElementById('connect-modal').classList.remove('active')">✕</button>
+    <h2>Connect Wallet</h2>
+    <p>Enter your crypto wallet address to save your balance and winnings across sessions.</p>
+    <div class="manual-wallet-wrap">
+      <label>YOUR WALLET ADDRESS</label>
+      <input type="text" id="connect-wallet-input" placeholder="0x... or TRC20 address" />
+    </div>
+    <br/>
+    <button class="btn-confirm" id="confirm-connect-btn">CONNECT</button>
+  </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div class="modal-overlay" id="deposit-modal">
+  <div class="modal deposit-modal">
+    <button class="modal-close" onclick="document.getElementById('deposit-modal').classList.remove('active')">✕</button>
+    <h2>Deposit Funds</h2>
+    <p>Add USDT to your balance and use it to reveal tiles anytime.</p>
+    <div class="deposit-amounts">
+      <button class="deposit-btn active" data-amount="5" onclick="selectDeposit(this,5)"><b>$5</b>5 tiles</button>
+      <button class="deposit-btn" data-amount="10" onclick="selectDeposit(this,10)"><b>$10</b>10 tiles</button>
+      <button class="deposit-btn" data-amount="20" onclick="selectDeposit(this,20)"><b>$20</b>20 tiles</button>
+      <button class="deposit-btn" data-amount="50" onclick="selectDeposit(this,50)"><b>$50</b>50 tiles</button>
+    </div>
+    <div class="balance-preview">
+      <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
+      <div><span>Depositing</span><span id="dep-amount-preview">$5.00</span></div>
+      <div><span>New balance</span><span id="dep-new-balance">$5.00</span></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
+      <div class="coin-select">
+        <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
+        <button class="coin-btn" data-coin="btc">BTC</button>
+        <button class="coin-btn" data-coin="eth">ETH</button>
+        <button class="coin-btn" data-coin="trx">TRX</button>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
+  </div>
+</div>
+
+<!-- PRIVACY MODAL -->
+<div class="modal-overlay" id="privacy-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('privacy-modal').classList.remove('active')">✕</button>
+    <h2>Privacy Policy</h2>
+    <p>HiddenDrop does not collect personal information. The only data we store is your crypto wallet address (which you provide voluntarily) to send prizes. We do not share your data with third parties. Payments are processed by NOWPayments. Game state is stored on Supabase.</p>
+  </div>
+</div>
+
+<!-- SECURITY MODAL -->
+<div class="modal-overlay" id="security-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('security-modal').classList.remove('active')">✕</button>
+    <h2>Security</h2>
+    <p>All payments are processed through NOWPayments, a trusted crypto payment processor. We never store your private keys or payment details. Prize payouts are sent directly to the wallet address you provide. Tile state is recorded on Supabase with real-time verification.</p>
+  </div>
+</div>
+
+<!-- HOW IT WORKS MODAL -->
+<div class="modal-overlay" id="howto-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('howto-modal').classList.remove('active')">✕</button>
+    <h2>How it Works</h2>
+    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $2 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
+  </div>
+</div>
+
+<!-- COFFEE MODAL -->
+<div class="modal-overlay" id="coffee-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('coffee-modal').classList.remove('active')">✕</button>
+    <h2>☕ Buy Me a Coffee</h2>
+    <p>Enjoying HiddenDrop? Support the developer with a small crypto donation. Every coffee keeps the server running!</p>
+    <div class="coffee-amounts">
+      <button class="coffee-amount-btn active" data-amount="1" onclick="selectCoffee(this,'1')">
+        <span class="coffee-emoji">☕</span>$1
+      </button>
+      <button class="coffee-amount-btn" data-amount="3" onclick="selectCoffee(this,'3')">
+        <span class="coffee-emoji">☕☕</span>$3
+      </button>
+      <button class="coffee-amount-btn" data-amount="5" onclick="selectCoffee(this,'5')">
+        <span class="coffee-emoji">☕☕☕</span>$5
+      </button>
+      <button class="coffee-amount-btn" data-amount="10" onclick="selectCoffee(this,'10')">
+        <span class="coffee-emoji">🏆</span>$10
+      </button>
+    </div>
+    <div class="coffee-address-box">
+      <div class="coffee-network">USDT · TRC20 Network</div>
+      <div class="coffee-address" id="coffee-wallet-address">حط هون عنوان محفظتك</div>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
+    </div>
+    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
+  </div>
+</div>
+
+
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────────────
+const SUPABASE_URL = 'حط هون الـ Project URL'
+const SUPABASE_KEY = 'حط هون الـ anon public key'
+const UNSPLASH_KEY = 'حط هون الـ Unsplash Access Key'
+
 // ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
@@ -1140,106 +1245,7 @@ window.addEventListener('load', async () => {
 </script>
 
 
-<!-- CONNECT WALLET MODAL -->
-<div class="modal-overlay" id="connect-modal">
-  <div class="modal connect-modal">
-    <button class="modal-close" onclick="document.getElementById('connect-modal').classList.remove('active')">✕</button>
-    <h2>Connect Wallet</h2>
-    <p>Enter your crypto wallet address to save your balance and winnings across sessions.</p>
-    <div class="manual-wallet-wrap">
-      <label>YOUR WALLET ADDRESS</label>
-      <input type="text" id="connect-wallet-input" placeholder="0x... or TRC20 address" />
-    </div>
-    <br/>
-    <button class="btn-confirm" id="confirm-connect-btn">CONNECT</button>
-  </div>
-</div>
 
-<!-- DEPOSIT MODAL -->
-<div class="modal-overlay" id="deposit-modal">
-  <div class="modal deposit-modal">
-    <button class="modal-close" onclick="document.getElementById('deposit-modal').classList.remove('active')">✕</button>
-    <h2>Deposit Funds</h2>
-    <p>Add USDT to your balance and use it to reveal tiles anytime.</p>
-    <div class="deposit-amounts">
-      <button class="deposit-btn active" data-amount="5" onclick="selectDeposit(this,5)"><b>$5</b>5 tiles</button>
-      <button class="deposit-btn" data-amount="10" onclick="selectDeposit(this,10)"><b>$10</b>10 tiles</button>
-      <button class="deposit-btn" data-amount="20" onclick="selectDeposit(this,20)"><b>$20</b>20 tiles</button>
-      <button class="deposit-btn" data-amount="50" onclick="selectDeposit(this,50)"><b>$50</b>50 tiles</button>
-    </div>
-    <div class="balance-preview">
-      <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
-      <div><span>Depositing</span><span id="dep-amount-preview">$5.00</span></div>
-      <div><span>New balance</span><span id="dep-new-balance">$5.00</span></div>
-    </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
-      <div class="coin-select">
-        <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
-        <button class="coin-btn" data-coin="btc">BTC</button>
-        <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn" data-coin="trx">TRX</button>
-      </div>
-    </div>
-    <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
-  </div>
-</div>
-
-<!-- PRIVACY MODAL -->
-<div class="modal-overlay" id="privacy-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('privacy-modal').classList.remove('active')">✕</button>
-    <h2>Privacy Policy</h2>
-    <p>HiddenDrop does not collect personal information. The only data we store is your crypto wallet address (which you provide voluntarily) to send prizes. We do not share your data with third parties. Payments are processed by NOWPayments. Game state is stored on Supabase.</p>
-  </div>
-</div>
-
-<!-- SECURITY MODAL -->
-<div class="modal-overlay" id="security-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('security-modal').classList.remove('active')">✕</button>
-    <h2>Security</h2>
-    <p>All payments are processed through NOWPayments, a trusted crypto payment processor. We never store your private keys or payment details. Prize payouts are sent directly to the wallet address you provide. Tile state is recorded on Supabase with real-time verification.</p>
-  </div>
-</div>
-
-<!-- HOW IT WORKS MODAL -->
-<div class="modal-overlay" id="howto-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('howto-modal').classList.remove('active')">✕</button>
-    <h2>How it Works</h2>
-    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $2 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
-  </div>
-</div>
-
-<!-- COFFEE MODAL -->
-<div class="modal-overlay" id="coffee-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('coffee-modal').classList.remove('active')">✕</button>
-    <h2>☕ Buy Me a Coffee</h2>
-    <p>Enjoying HiddenDrop? Support the developer with a small crypto donation. Every coffee keeps the server running!</p>
-    <div class="coffee-amounts">
-      <button class="coffee-amount-btn active" data-amount="1" onclick="selectCoffee(this,'1')">
-        <span class="coffee-emoji">☕</span>$1
-      </button>
-      <button class="coffee-amount-btn" data-amount="3" onclick="selectCoffee(this,'3')">
-        <span class="coffee-emoji">☕☕</span>$3
-      </button>
-      <button class="coffee-amount-btn" data-amount="5" onclick="selectCoffee(this,'5')">
-        <span class="coffee-emoji">☕☕☕</span>$5
-      </button>
-      <button class="coffee-amount-btn" data-amount="10" onclick="selectCoffee(this,'10')">
-        <span class="coffee-emoji">🏆</span>$10
-      </button>
-    </div>
-    <div class="coffee-address-box">
-      <div class="coffee-network">USDT · TRC20 Network</div>
-      <div class="coffee-address" id="coffee-wallet-address">TCgzzpfsGqEovDxkDRXWQHu4HV9Xh2QhZN</div>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
-    </div>
-    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
-  </div>
-</div>
-
+</script>
 </body>
 </html>
