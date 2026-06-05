@@ -236,6 +236,18 @@
     .balance-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-family: 'Space Mono', monospace; font-size: 0.75rem; }
     .balance-preview div { display: flex; justify-content: space-between; padding: 3px 0; color: var(--muted); }
     .balance-preview div span:last-child { color: var(--accent); }
+
+    /* DEPOSIT FLOW */
+    .coin-btn-large { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; transition: all 0.2s; text-align: left; font-family: 'DM Sans', sans-serif; }
+    .coin-btn-large:hover { border-color: var(--accent); }
+    .coin-btn-large.active { border-color: var(--accent); background: rgba(240,224,64,0.05); }
+    .coin-btn-large div { flex: 1; }
+    .coin-btn-large b { display: block; font-size: 0.9rem; color: var(--text); }
+    .coin-btn-large span:nth-child(2) { font-size: 0.75rem; color: var(--muted); }
+    .coin-check { color: var(--accent); font-size: 1rem; }
+    .step-progress { display: flex; gap: 6px; margin-bottom: 20px; }
+    .step-dot { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
+    .step-dot.active { background: var(--accent); }
   </style>
 </head>
 <body>
@@ -384,7 +396,7 @@
     <div class="card">
       <div class="card-title">// reveal a tile</div>
       <div class="buy-section">
-        <div class="price-display"><span>Per tile</span><strong>$2.00 USDT</strong></div>
+        <div class="price-display"><span>Per tile</span><strong>$3.00 USDT</strong></div>
         <button class="btn-buy" id="buy-btn">REVEAL A TILE</button>
         <div class="crypto-note">NOWPayments · Crypto only</div>
       </div>
@@ -404,9 +416,9 @@
   <div class="modal">
     <button class="modal-close" id="modal-close">✕</button>
     <h2>Reveal a Tile</h2>
-    <p>Pay $2 USDT to reveal a random tile. The image stays blurred until ALL tiles are revealed. Last tile wins the prize!</p>
+    <p>Pay $3 USDT to reveal a random tile. The image stays blurred until ALL tiles are revealed. Last tile wins the prize!</p>
     <div class="tile-info">
-      <div><span>Price</span><span>$2.00 USDT</span></div>
+      <div><span>Price</span><span>$3.00 USDT</span></div>
       <div><span>Tiles remaining</span><span id="modal-remaining">100</span></div>
       <div><span>Win chance</span><span id="modal-chance">1%</span></div>
       <div><span>Prize pool</span><span id="modal-prize">$0.00</span></div>
@@ -418,17 +430,17 @@
     <div style="margin-bottom:16px;">
       <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
       <div class="coin-select">
-        <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
+        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
         <button class="coin-btn" data-coin="btc">BTC</button>
         <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn" data-coin="usdttrc20" class="coin-btn active">USDT</button>
+        <button class="coin-btn active" data-coin="trx">TRX</button>
       </div>
     </div>
     <div id="free-tile-notice" style="display:none;background:linear-gradient(135deg,#0d2000,#1a3300);border:1px solid #4dff88;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:0.75rem;color:#4dff88;text-align:center;">
   🎁 You have <b id="free-tiles-available">0</b> free tile(s)! Use one instead of paying?
   <br/><button onclick="useFreeeTile()" style="margin-top:8px;background:#4dff88;color:#000;border:none;border-radius:4px;padding:6px 16px;font-family:'Space Mono',monospace;font-size:0.7rem;cursor:pointer;font-weight:700;">USE FREE TILE</button>
 </div>
-<button class="btn-confirm" id="confirm-pay">PAY $2 & REVEAL</button>
+<button class="btn-confirm" id="confirm-pay">PAY $3 & REVEAL</button>
   </div>
 </div>
 
@@ -486,10 +498,10 @@
     <div style="margin-bottom:16px;">
       <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
       <div class="coin-select">
-        <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
+        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
         <button class="coin-btn" data-coin="btc">BTC</button>
         <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn" data-coin="usdttrc20" class="coin-btn active">USDT</button>
+        <button class="coin-btn active" data-coin="trx">TRX</button>
       </div>
     </div>
     <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
@@ -519,7 +531,7 @@
   <div class="modal">
     <button class="modal-close" onclick="document.getElementById('howto-modal').classList.remove('active')">✕</button>
     <h2>How it Works</h2>
-    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $2 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
+    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $3 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
   </div>
 </div>
 
@@ -555,21 +567,22 @@
 
 
 <script>
-  // ─── CONFIG ───────────────────────────────────────────────────────
+// ─── CONFIG ───────────────────────────────────────────────────────
 const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5lYWdia3JtaHllY25wb25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDYxNDUsImV4cCI6MjA5NTkyMjE0NX0.m_Sl1-8pmg_RJRJlk6vlv5bZb3aMdFs-rx6Rd0y4n_c'
 const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
-const API_URL = 'https://hidden-drop.onrender.com'
+const API_URL = 'https://hiddendrop.onrender.com'
+
 // ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 
 const TOTAL_TILES = 100
-const TILE_PRICE = 2.00
+const TILE_PRICE = 3.00
 const PRIZE_PERCENT = 0.20
 
 let revealedTiles = new Set()
-let selectedCoin = 'usdttrc20'
+let selectedCoin = 'trx'
 let currentImageUrl = ''
 let currentImageId = null
 let currentCategory = 'stadiums'
@@ -978,7 +991,7 @@ function updateWalletUI() {
 
   // Update buy button
   const buyBtn = document.getElementById('buy-btn')
-  if(myBalance >= 2) {
+  if(myBalance >= 3) {
     buyBtn.textContent = 'REVEAL A TILE ($2)'
     buyBtn.disabled = false
   } else {
@@ -1014,20 +1027,26 @@ document.getElementById('deposit-btn').addEventListener('click', () => {
 })
 
 document.getElementById('confirm-deposit-btn').addEventListener('click', async () => {
-  if(!myWallet) { alert('Connect your wallet first!'); return }
+  const walletInput = document.getElementById('dep-wallet-input').value.trim()
+  if(!walletInput) { document.getElementById('dep-wallet-input').style.borderColor = 'var(--accent2)'; return }
+
+  // Connect wallet if not connected
+  if(!myWallet) await connectWalletAddress(walletInput)
 
   const btn = document.getElementById('confirm-deposit-btn')
   btn.disabled = true
   btn.textContent = 'Creating payment...'
+
+  const totalAmount = depTiles * 3
 
   try {
     const response = await fetch(`${API_URL}/api/create-payment`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        pay_currency: selectedCoin,
-        amount: depositAmount,
-        wallet: myWallet,
+        pay_currency: depCoin,
+        amount: totalAmount,
+        wallet: walletInput,
         type: 'deposit'
       })
     })
@@ -1049,7 +1068,7 @@ document.getElementById('confirm-deposit-btn').addEventListener('click', async (
     }
 
     // Poll deposit payment
-    pollDepositPayment(payment.payment_id, depositAmount)
+    pollDepositPayment(payment.payment_id, totalAmount)
 
   } catch(e) {
     alert('Error: ' + e.message)
@@ -1101,13 +1120,74 @@ document.getElementById('buy-btn').addEventListener('click', () => {
     document.getElementById('connect-modal').classList.add('active')
     return
   }
-  if(myBalance < 2) {
+  if(myBalance < 3) {
     document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
     document.getElementById('dep-new-balance').textContent = `$${(myBalance + depositAmount).toFixed(2)}`
     document.getElementById('deposit-modal').classList.add('active')
     return
   }
   openBuyModal()
+})
+
+
+// ─── DEPOSIT FLOW ─────────────────────────────────────────────────
+let depTiles = 5
+let depCoin = 'usdttrc20'
+
+function selectTiles(btn, tiles) {
+  document.querySelectorAll('.deposit-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  depTiles = tiles
+  const total = tiles * 3
+  document.getElementById('dep-tiles-count').textContent = `${tiles} tiles`
+  document.getElementById('dep-total-cost').textContent = `$${total}.00`
+  document.getElementById('dep-new-balance').textContent = `$${(myBalance + total).toFixed(2)}`
+  document.getElementById('dep-amount-preview') && (document.getElementById('dep-amount-preview').textContent = `$${total}.00`)
+}
+
+function selectDepCoin(btn, coin) {
+  document.querySelectorAll('.coin-btn-large').forEach(b => {
+    b.classList.remove('active')
+    b.querySelector('.coin-check').style.opacity = '0'
+  })
+  btn.classList.add('active')
+  btn.querySelector('.coin-check').style.opacity = '1'
+  depCoin = coin
+}
+
+function depNextStep(step) {
+  document.getElementById('dep-step-1').style.display = 'none'
+  document.getElementById('dep-step-2').style.display = 'none'
+  document.getElementById('dep-step-3').style.display = 'none'
+  document.getElementById(`dep-step-${step}`).style.display = 'block'
+
+  if(step === 3) {
+    const total = depTiles * 3
+    document.getElementById('dep-summary-amount').textContent = `$${total}.00`
+    document.getElementById('dep-summary-coin').textContent = depCoin.toUpperCase()
+    document.getElementById('dep-summary-tiles').textContent = `${depTiles} tiles`
+    const remaining = TOTAL_TILES - revealedTiles.size
+    document.getElementById('dep-summary-chance').textContent = `${(depTiles/Math.max(remaining,1)*100).toFixed(1)}%`
+
+    // Pre-fill wallet if connected
+    if(myWallet) document.getElementById('dep-wallet-input').value = myWallet
+  }
+}
+
+// Override deposit button click
+document.getElementById('deposit-btn').addEventListener('click', () => {
+  // Reset to step 1
+  depTiles = 5
+  depCoin = 'usdttrc20'
+  document.querySelectorAll('.deposit-btn').forEach((b,i) => b.classList.toggle('active', i===0))
+  document.querySelectorAll('.coin-btn-large').forEach((b,i) => {
+    b.classList.toggle('active', i===0)
+    b.querySelector('.coin-check').style.opacity = i===0 ? '1' : '0'
+  })
+  document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
+  document.getElementById('dep-new-balance').textContent = `$${(myBalance + 15).toFixed(2)}`
+  depNextStep(1)
+  document.getElementById('deposit-modal').classList.add('active')
 })
 
 // ─── MENU ─────────────────────────────────────────────────────────

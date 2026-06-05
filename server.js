@@ -15,7 +15,7 @@ app.post('/api/create-payment', async (req, res) => {
   console.log('Incoming request:', { pay_currency, amount, tile_id, image_id, wallet, type })
   try {
     const isDeposit = type === 'deposit'
-    const price = isDeposit ? amount : 2.00
+    const price = isDeposit ? parseFloat(amount) : 3.00
     const currency = (pay_currency || 'USDTTRC20').toUpperCase()
     const orderId = isDeposit
       ? `deposit_${wallet}_${Date.now()}`
@@ -46,6 +46,19 @@ app.post('/api/create-payment', async (req, res) => {
       pay_amount: payment.pay_amount,
       pay_currency: payment.pay_currency
     })
+  } catch(e) {
+    return res.status(500).json({ error: e.message })
+  }
+})
+
+// ─── MIN AMOUNT ───────────────────────────────────────────────────
+app.get('/api/min-amount', async (req, res) => {
+  try {
+    const response = await fetch('https://api.nowpayments.io/v1/min-amount?currency_from=usdttrc20&currency_to=usdttrc20', {
+      headers: { 'x-api-key': process.env.NOWPAYMENTS_KEY }
+    })
+    const data = await response.json()
+    return res.json(data)
   } catch(e) {
     return res.status(500).json({ error: e.message })
   }
