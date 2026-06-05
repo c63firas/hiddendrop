@@ -247,6 +247,28 @@
     .confetti { position:fixed; z-index:600; animation:fall 3s ease-in forwards; pointer-events:none; }
     @keyframes fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
 
+    /* PREVENT IMAGE DRAG */
+    img { -webkit-user-drag:none; user-select:none; -webkit-user-select:none; }
+    .img-thumb img { pointer-events:none; }
+
+    /* WINNER BANNER */
+    .winner-banner { position:fixed; inset:0; background:rgba(0,0,0,.92); z-index:800; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:20px; backdrop-filter:blur(8px); opacity:0; pointer-events:none; transition:opacity .5s; }
+    .winner-banner.show { opacity:1; pointer-events:all; }
+    .winner-title { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.5rem,8vw,6rem); letter-spacing:8px; color:var(--accent); text-align:center; text-shadow:0 0 60px rgba(240,224,64,.6); animation:pulse-glow 1.5s infinite; }
+    .winner-sub { font-family:'Space Mono',monospace; font-size:.9rem; color:var(--text); text-align:center; line-height:1.8; }
+    .winner-prize { font-family:'Bebas Neue',sans-serif; font-size:clamp(3rem,10vw,8rem); color:var(--green); text-shadow:0 0 60px rgba(77,255,136,.5); }
+    .winner-note { font-family:'Space Mono',monospace; font-size:.7rem; color:var(--muted); text-align:center; max-width:400px; line-height:1.7; }
+    .winner-close { padding:12px 32px; background:var(--accent); color:#000; border:none; border-radius:3px; font-family:'Bebas Neue',sans-serif; font-size:1.2rem; letter-spacing:3px; cursor:pointer; margin-top:10px; }
+
+    /* EXCITEMENT SIDEBAR */
+    .excitement-bar { background:linear-gradient(135deg,#0a0a00,#111100); border:1px solid rgba(240,224,64,.2); border-radius:4px; padding:16px; margin-bottom:16px; }
+    .exc-title { font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:3px; color:var(--accent); margin-bottom:12px; }
+    .exc-prize { text-align:center; margin-bottom:12px; }
+    .exc-prize .ep-amount { font-family:'Bebas Neue',sans-serif; font-size:3rem; color:var(--green); display:block; line-height:1; text-shadow:0 0 30px rgba(77,255,136,.4); }
+    .exc-prize small { font-family:'Space Mono',monospace; font-size:.6rem; color:var(--muted); }
+    .exc-tiles-left { font-family:'Space Mono',monospace; font-size:.72rem; color:var(--muted); text-align:center; }
+    .exc-tiles-left b { color:var(--accent2); font-size:1.1rem; }
+
     /* RESPONSIVE */
     @media(max-width:768px) {
       header,
@@ -374,13 +396,23 @@
       <div class="prog-text"><span id="prog-revealed">0</span><span id="prog-left">100 left</span></div>
     </div>
 
+    <!-- EXCITEMENT BAR -->
+    <div class="excitement-bar">
+      <div class="exc-title">// 🏆 TOP PRIZE</div>
+      <div class="exc-prize">
+        <span class="ep-amount">$100</span>
+        <small>USDT · LAST TILE WINS</small>
+      </div>
+      <div class="exc-tiles-left">Only <b id="exc-left">100</b> tiles stand between<br/>someone and $100!</div>
+    </div>
+
     <div class="card">
       <div class="card-title">// PRIZE POOL</div>
       <div class="prize-big">
         <span class="val" id="prize-val">$0.00</span>
         <small>USDT · LIVE</small>
       </div>
-      <p class="prize-rule">The player who reveals the <strong style="color:var(--accent)">last tile</strong> wins <strong style="color:var(--accent)">20%</strong> of the prize pool instantly.</p>
+      <p class="prize-rule">The player who reveals the <strong style="color:var(--accent)">last tile</strong> wins <strong style="color:var(--accent)">$100 USDT</strong> sent directly to their wallet!</p>
     </div>
 
     <div class="card">
@@ -559,7 +591,7 @@
   <div class="modal">
     <button class="modal-close" onclick="closeModal('how-modal')">✕</button>
     <h2>How It Works</h2>
-    <p>1. <strong style="color:var(--accent)">Choose a category</strong> and select a mystery image from the thumbnails above.<br/><br/>2. <strong style="color:var(--accent)">Deposit funds</strong> — minimum $15 (5 tiles at $3 each). Your balance is saved to your wallet address.<br/><br/>3. <strong style="color:var(--accent)">Reveal tiles</strong> from your balance. The image stays fully blurred the entire time — no peeking!<br/><br/>4. <strong style="color:var(--accent)">Last tile wins!</strong> The player who reveals the final tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>5. <strong style="color:var(--accent)">Share your referral link</strong> — earn a free tile every time a friend makes their first deposit!</p>
+    <p>1. <strong style="color:var(--accent)">Choose a category</strong> and select a mystery image from the thumbnails above.<br/><br/>2. <strong style="color:var(--accent)">Deposit funds</strong> — minimum $15 (5 tiles at $3 each). Your balance is saved to your wallet address.<br/><br/>3. <strong style="color:var(--accent)">Reveal tiles</strong> from your balance. The image stays fully blurred the entire time — no peeking!<br/><br/>4. <strong style="color:var(--accent)">Last tile wins $100!</strong> The player who reveals the final tile wins $100 USDT, sent manually to their wallet within 24 hours.<br/><br/>5. <strong style="color:var(--accent)">Share your referral link</strong> — earn a free tile every time a friend makes their first deposit!</p>
   </div>
 </div>
 
@@ -602,6 +634,16 @@
   </div>
 </div>
 
+
+<!-- WINNER BANNER -->
+<div class="winner-banner" id="winner-banner">
+  <div class="winner-title">🏆 WE HAVE A WINNER!</div>
+  <div class="winner-prize">$100</div>
+  <div class="winner-sub">The mystery has been revealed!<br/><span id="winner-wallet" style="color:var(--accent)">—</span></div>
+  <div class="winner-note">The winner will receive $100 USDT within 24 hours to their wallet. Thank you all for playing!</div>
+  <button class="winner-close" onclick="document.getElementById('winner-banner').classList.remove('show')">CLOSE</button>
+</div>
+
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
 
@@ -623,6 +665,7 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 const TOTAL   = 100
 const PRICE   = 3.00
 const PRIZE_P = 0.20
+const WINNER_PRIZE = 100
 
 let revealed   = new Set()
 let myWallet   = ''
@@ -684,12 +727,14 @@ function updateStats() {
 
   document.getElementById('s-revealed').textContent = rev
   document.getElementById('s-remaining').textContent = left
-  document.getElementById('s-prize').textContent = `$${prize}`
-  document.getElementById('hero-prize').textContent = `$${prize}`
-  document.getElementById('prize-val').textContent = `$${prize}`
+  document.getElementById('s-prize').textContent = '$100'
+  document.getElementById('hero-prize').textContent = '100'
+  document.getElementById('prize-val').textContent = '$100'
   document.getElementById('prog-revealed').textContent = rev
   document.getElementById('prog-left').textContent = `${left} left`
   document.getElementById('prog-fill').style.width = `${pct}%`
+  const excEl = document.getElementById('exc-left')
+  if(excEl) excEl.textContent = left
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -741,7 +786,7 @@ document.getElementById('btn-connect-confirm').addEventListener('click', () => {
   const v = document.getElementById('connect-input').value.trim()
   if(!v) { document.getElementById('connect-input').classList.add('err'); return }
   document.getElementById('connect-input').classList.remove('err')
-  connectWallet(v)
+  connectWallet(sanitizeWallet(v))
 })
 
 // ════════════════════════════════════════════════════════════════
@@ -895,7 +940,7 @@ function revealTileUI(idx, wallet) {
   updateStats()
   checkLastTile()
   checkAllRevealed()
-  if(revealed.size === TOTAL) setTimeout(showWinner, 800)
+  if(revealed.size === TOTAL) setTimeout(() => showWinner(wallet), 800)
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -1135,9 +1180,25 @@ function selectCoffee(el, amt) {
 // ════════════════════════════════════════════════════════════════
 // WINNER
 // ════════════════════════════════════════════════════════════════
-function showWinner() {
+function showWinner(winnerWallet) {
   spawnConfetti()
-  setTimeout(() => showToast('🏆 ALL TILES REVEALED! Winner gets the prize!', 6000), 300)
+  // Show winner banner
+  const banner = document.getElementById('winner-banner')
+  const walletEl = document.getElementById('winner-wallet')
+  if(walletEl && winnerWallet) {
+    walletEl.textContent = winnerWallet.slice(0,8)+'...'+winnerWallet.slice(-6)
+  }
+  setTimeout(() => banner.classList.add('show'), 500)
+
+  // Save winner to Supabase for admin notification
+  db.from('game_state').upsert({
+    image_id: curImgId,
+    last_tile_winner: winnerWallet || 'unknown',
+    winner_notified: false,
+    prize_amount: 100
+  }, { onConflict: 'image_id' }).then(() => {
+    console.log('Winner saved to database')
+  })
 }
 
 function spawnConfetti() {
@@ -1149,6 +1210,28 @@ function spawnConfetti() {
     document.body.appendChild(c)
     setTimeout(() => c.remove(), 3500)
   }
+}
+
+
+// ════════════════════════════════════════════════════════════════
+// SECURITY
+// ════════════════════════════════════════════════════════════════
+// Prevent multiple rapid reveals
+let lastRevealTime = 0
+const REVEAL_COOLDOWN = 3000 // 3 seconds
+
+function sanitizeWallet(addr) {
+  return addr.replace(/[^a-zA-Z0-9]/g, '').slice(0, 64)
+}
+
+async function doRevealSecure() {
+  const now = Date.now()
+  if(now - lastRevealTime < REVEAL_COOLDOWN) {
+    showToast('Please wait a moment before revealing again')
+    return
+  }
+  lastRevealTime = now
+  await doReveal()
 }
 
 // ════════════════════════════════════════════════════════════════
