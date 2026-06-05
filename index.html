@@ -1,295 +1,285 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>HiddenDrop — Reveal the Mystery</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;600&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
-      --bg: #080808;
-      --surface: #111111;
-      --border: #222222;
+      --bg: #060606;
+      --surface: #0f0f0f;
+      --border: #1e1e1e;
       --accent: #f0e040;
-      --accent2: #ff4d4d;
+      --accent2: #ff4444;
+      --green: #4dff88;
       --text: #f0f0f0;
-      --muted: #555555;
+      --muted: #484848;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
-    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(240,224,64,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(240,224,64,0.03) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; overflow-x:hidden; }
 
-    /* HEADER */
-    header { position: relative; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 24px 40px; border-bottom: 1px solid var(--border); }
-    .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; color: var(--accent); text-shadow: 0 0 30px rgba(240,224,64,0.4); }
-    .logo span { color: var(--text); }
-    .header-stats { display: flex; gap: 32px; font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); }
-    .header-stats b { color: var(--accent); font-size: 1rem; display: block; }
-
-    /* TICKER */
-    .ticker { position: relative; z-index: 10; background: var(--accent); color: #000; padding: 8px 0; overflow: hidden; font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 2px; white-space: nowrap; }
-    .ticker-inner { display: inline-block; animation: ticker 25s linear infinite; }
-    @keyframes ticker { from { transform: translateX(100vw); } to { transform: translateX(-100%); } }
-
-    /* CATEGORIES */
-    .categories-wrap { position: relative; z-index: 10; padding: 32px 40px 0; }
-    .categories-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
-    .categories { display: flex; gap: 12px; flex-wrap: wrap; }
-    .cat-btn { padding: 10px 20px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
-    .cat-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .cat-btn.active { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
-    .cat-btn .cat-icon { margin-right: 6px; }
-
-    /* HERO */
-    .hero { position: relative; z-index: 10; text-align: center; padding: 32px 40px 24px; }
-    .hero h1 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(2rem, 5vw, 4rem); letter-spacing: 6px; line-height: 1; margin-bottom: 8px; }
-    .hero h1 em { color: var(--accent); font-style: normal; }
-    .hero p { color: var(--muted); font-size: 0.9rem; max-width: 480px; margin: 0 auto 20px; line-height: 1.7; }
-    .prize-badge { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, #1a1a00, #2a2a00); border: 1px solid var(--accent); border-radius: 4px; padding: 10px 24px; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent); box-shadow: 0 0 20px rgba(240,224,64,0.15); }
-    .prize-badge .amount { font-size: 1.4rem; font-weight: 700; }
-
-    /* IMAGE SELECTOR */
-    .image-selector-wrap { position: relative; z-index: 10; padding: 20px 40px 0; }
-    .image-selector-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 12px; }
-    .image-selector { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px; }
-    .image-selector::-webkit-scrollbar { height: 3px; }
-    .image-selector::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    .img-thumb { width: 80px; height: 60px; border: 2px solid var(--border); border-radius: 4px; cursor: pointer; overflow: hidden; flex-shrink: 0; transition: all 0.2s; position: relative; }
-    .img-thumb img { width: 100%; height: 100%; object-fit: cover; filter: blur(8px); transform: scale(1.1); }
-    .img-thumb:hover { border-color: var(--accent); }
-    .img-thumb.active { border-color: var(--accent); box-shadow: 0 0 12px rgba(240,224,64,0.4); }
-    .img-thumb .thumb-num { position: absolute; bottom: 2px; right: 4px; font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--accent); text-shadow: 0 0 4px #000; }
-    .img-loading { width: 80px; height: 60px; background: var(--surface); border: 2px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .img-loading-dot { width: 6px; height: 6px; background: var(--muted); border-radius: 50%; animation: pulse 1s infinite; }
-    @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
-
-    /* MAIN */
-    .main { position: relative; z-index: 10; display: grid; grid-template-columns: 1fr 320px; gap: 32px; padding: 24px 40px; max-width: 1200px; margin: 0 auto; }
-
-    /* PUZZLE */
-    .puzzle-wrap { position: relative; }
-    .puzzle-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
-    .puzzle-label .current-img-name { color: var(--accent); }
-    .puzzle-container { position: relative; width: 100%; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: #0a0a0a; }
-    .puzzle-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(20px); transform: scale(1.1); transition: filter 0.8s ease, transform 0.8s ease; }
-    .puzzle-image.fully-revealed { filter: blur(0px) !important; transform: scale(1) !important; }
-    .tile-grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); }
-    .tile { border: 1px solid #1a1a1a; background: rgba(8,8,8,0.95); cursor: pointer; transition: all 0.2s ease; position: relative; }
-    .tile:hover { background: rgba(30,30,30,0.9); border-color: var(--accent); z-index: 2; transform: scale(1.05); box-shadow: 0 0 12px rgba(240,224,64,0.3); }
-    .tile.revealed { background: transparent !important; border-color: transparent !important; cursor: default; pointer-events: none; }
-    .tile.last-tile { border-color: var(--accent2) !important; animation: pulse-red 1s infinite; }
-    @keyframes pulse-red { 0%,100% { box-shadow: 0 0 8px rgba(255,77,77,0.4); } 50% { box-shadow: 0 0 20px rgba(255,77,77,0.8); } }
-
-    /* SIDEBAR */
-    .sidebar { display: flex; flex-direction: column; gap: 20px; }
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 24px; }
-    .card-title { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 16px; }
-    .progress-bar { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 8px; }
-    .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #ffaa00); border-radius: 3px; transition: width 0.5s ease; width: 0%; }
-    .progress-text { display: flex; justify-content: space-between; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); }
-    .progress-text span:first-child { color: var(--accent); font-size: 1.1rem; font-weight: 700; }
-    .prize-info { text-align: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-    .prize-info .prize-amount { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: var(--accent); letter-spacing: 2px; text-shadow: 0 0 20px rgba(240,224,64,0.3); display: block; }
-    .prize-info .prize-label { font-size: 0.75rem; color: var(--muted); font-family: 'Space Mono', monospace; }
-    .prize-rule { font-size: 0.78rem; color: var(--muted); line-height: 1.6; border-left: 2px solid var(--accent); padding-left: 12px; }
-    .buy-section { display: flex; flex-direction: column; gap: 12px; }
-    .price-display { display: flex; align-items: center; justify-content: space-between; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); }
-    .price-display strong { color: var(--text); font-size: 1rem; }
-    .btn-buy { width: 100%; padding: 16px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 3px; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; }
-    .btn-buy::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); transition: left 0.4s ease; }
-    .btn-buy:hover::before { left: 100%; }
-    .btn-buy:hover { background: #fff; box-shadow: 0 0 30px rgba(240,224,64,0.5); transform: translateY(-1px); }
-    .btn-buy:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
-    .crypto-note { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; color: var(--muted); font-family: 'Space Mono', monospace; }
-    .crypto-note::before { content: '₿'; color: var(--accent); font-size: 0.9rem; }
-    .activity-list { display: flex; flex-direction: column; gap: 10px; max-height: 180px; overflow-y: auto; }
-    .activity-list::-webkit-scrollbar { width: 3px; }
-    .activity-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-    .activity-item { display: flex; align-items: center; gap: 10px; font-size: 0.75rem; animation: slideIn 0.3s ease; }
-    @keyframes slideIn { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
-    .activity-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
-    .activity-text { color: var(--muted); flex: 1; }
-    .activity-text b { color: var(--text); }
-    .activity-time { color: var(--border); font-family: 'Space Mono', monospace; font-size: 0.65rem; }
-
-    /* MODALS */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-    .modal-overlay.active { opacity: 1; pointer-events: all; }
-    .modal { background: var(--surface); border: 1px solid var(--accent); border-radius: 4px; padding: 40px; max-width: 480px; width: 90%; position: relative; box-shadow: 0 0 60px rgba(240,224,64,0.15); transform: scale(0.95); transition: transform 0.3s ease; }
-    .modal-overlay.active .modal { transform: scale(1); }
-    .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--muted); font-size: 1.2rem; cursor: pointer; font-family: 'Space Mono', monospace; }
-    .modal-close:hover { color: var(--text); }
-    .modal h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 3px; margin-bottom: 8px; color: var(--accent); }
-    .modal p { color: var(--muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 24px; }
-    .tile-info { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 16px; margin-bottom: 20px; font-family: 'Space Mono', monospace; font-size: 0.75rem; }
-    .tile-info div { display: flex; justify-content: space-between; padding: 4px 0; color: var(--muted); }
-    .tile-info div span:last-child { color: var(--text); }
-    .wallet-input-wrap { margin-bottom: 16px; }
-    .wallet-input-wrap label { display: block; font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 8px; }
-    .wallet-input-wrap input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.8rem; outline: none; transition: border-color 0.2s; }
-    .wallet-input-wrap input:focus { border-color: var(--accent); }
-    .wallet-input-wrap input::placeholder { color: var(--muted); }
-    .coin-select { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-    .coin-btn { padding: 6px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.2s; }
-    .coin-btn:hover, .coin-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,224,64,0.05); }
-    .btn-confirm { width: 100%; padding: 14px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; letter-spacing: 3px; cursor: pointer; transition: all 0.2s; }
-    .btn-confirm:hover { background: #fff; box-shadow: 0 0 20px rgba(240,224,64,0.4); }
-    .btn-confirm:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-    .payment-address-box { background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; padding: 16px; margin-bottom: 16px; text-align: center; }
-    .payment-address-box .address { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--accent); word-break: break-all; margin-bottom: 8px; }
-    .copy-btn { background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 12px; border-radius: 4px; font-size: 0.7rem; cursor: pointer; font-family: 'Space Mono', monospace; }
-    .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.7rem; }
-    .status-waiting { background: rgba(240,224,64,0.1); color: var(--accent); border: 1px solid var(--accent); }
-    .status-confirmed { background: rgba(77,255,136,0.1); color: #4dff88; border: 1px solid #4dff88; }
-    .status-error { background: rgba(255,77,77,0.1); color: var(--accent2); border: 1px solid var(--accent2); }
+    /* GRID BG */
+    body::before { content:''; position:fixed; inset:0; background-image:linear-gradient(rgba(240,224,64,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(240,224,64,.025) 1px,transparent 1px); background-size:48px 48px; pointer-events:none; z-index:0; }
 
     /* LOADING */
-    .loading-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
-    .loading-overlay.hidden { display: none; }
-    .loading-text { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--muted); }
-    .loading-logo { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--accent); letter-spacing: 6px; }
+    #loading { position:fixed; inset:0; background:var(--bg); z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; transition:opacity .5s; }
+    #loading.fade { opacity:0; pointer-events:none; }
+    .load-logo { font-family:'Bebas Neue',sans-serif; font-size:4rem; letter-spacing:8px; color:var(--accent); text-shadow:0 0 40px rgba(240,224,64,.5); animation:pulse-glow 1.5s infinite; }
+    @keyframes pulse-glow { 0%,100%{text-shadow:0 0 40px rgba(240,224,64,.3);} 50%{text-shadow:0 0 80px rgba(240,224,64,.8);} }
+    .load-bar { width:200px; height:2px; background:var(--border); border-radius:2px; overflow:hidden; }
+    .load-bar-fill { height:100%; background:var(--accent); border-radius:2px; animation:load-progress 2s ease forwards; }
+    @keyframes load-progress { from{width:0%} to{width:100%} }
+    .load-text { font-family:'Space Mono',monospace; font-size:.7rem; color:var(--muted); letter-spacing:2px; }
 
-    /* CONFETTI */
-    @keyframes confetti-fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
-    .confetti-piece { position: fixed; width: 8px; height: 8px; z-index: 200; animation: confetti-fall 3s ease-in forwards; }
+    /* HEADER */
+    header { position:relative; z-index:10; display:flex; align-items:center; justify-content:space-between; padding:20px 40px; border-bottom:1px solid var(--border); backdrop-filter:blur(10px); }
+    .logo { font-family:'Bebas Neue',sans-serif; font-size:1.8rem; letter-spacing:4px; color:var(--accent); cursor:default; }
+    .logo span { color:var(--text); }
+    .header-right { display:flex; align-items:center; gap:20px; }
+    .header-stats { display:flex; gap:24px; font-family:'Space Mono',monospace; font-size:.7rem; color:var(--muted); }
+    .header-stats div { text-align:center; }
+    .header-stats b { display:block; color:var(--accent); font-size:1rem; }
 
-    @media (max-width: 768px) {
-      header { padding: 16px 20px; }
-      .header-stats { gap: 16px; }
-      .main { grid-template-columns: 1fr; padding: 16px 20px; }
-      .hero { padding: 24px 20px 16px; }
-      .categories-wrap { padding: 20px 20px 0; }
-      .image-selector-wrap { padding: 16px 20px 0; }
-    }
+    /* HAMBURGER */
+    .hamburger { background:none; border:none; cursor:pointer; display:flex; flex-direction:column; gap:5px; padding:4px; z-index:200; }
+    .hamburger span { display:block; width:22px; height:2px; background:var(--text); border-radius:2px; transition:all .3s; }
+    .hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity:0; }
+    .hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
 
-    /* HAMBURGER MENU */
-    .hamburger { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; padding: 4px; z-index: 200; }
-    .hamburger span { display: block; width: 24px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s ease; }
-    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .hamburger.open span:nth-child(2) { opacity: 0; }
-    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-    .side-menu { position: fixed; top: 0; left: -300px; width: 280px; height: 100vh; background: var(--surface); border-right: 1px solid var(--border); z-index: 150; transition: left 0.3s ease; padding: 80px 0 40px; display: flex; flex-direction: column; }
-    .side-menu.open { left: 0; box-shadow: 4px 0 40px rgba(0,0,0,0.5); }
-    .side-menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 140; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-    .side-menu-overlay.open { opacity: 1; pointer-events: all; }
-    .menu-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 3px; color: var(--muted); padding: 0 24px 12px; text-transform: uppercase; }
-    .menu-item { display: flex; align-items: center; gap: 14px; padding: 14px 24px; color: var(--text); font-size: 0.9rem; cursor: pointer; transition: all 0.2s; border-left: 2px solid transparent; text-decoration: none; background: none; border-top: none; border-right: none; border-bottom: none; width: 100%; text-align: left; font-family: 'DM Sans', sans-serif; }
-    .menu-item:hover { background: rgba(240,224,64,0.05); border-left-color: var(--accent); color: var(--accent); }
-    .menu-item .menu-icon { font-size: 1.1rem; width: 20px; text-align: center; }
-    .menu-divider { height: 1px; background: var(--border); margin: 8px 24px; }
-    .menu-item.coffee { margin-top: auto; background: linear-gradient(135deg, #1a1a00, #2a2a00); border-left: 2px solid var(--accent) !important; color: var(--accent) !important; font-family: 'Space Mono', monospace; font-size: 0.8rem; letter-spacing: 1px; }
-    .menu-item.coffee:hover { background: linear-gradient(135deg, #2a2a00, #3a3a00) !important; }
-    .coffee-amounts { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-    .coffee-amount-btn { flex: 1; min-width: 60px; padding: 10px 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.75rem; cursor: pointer; transition: all 0.2s; text-align: center; }
-    .coffee-amount-btn:hover, .coffee-amount-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,224,64,0.05); }
-    .coffee-amount-btn .coffee-emoji { display: block; font-size: 1.2rem; margin-bottom: 4px; }
-    .coffee-address-box { background: var(--bg); border: 1px solid var(--accent); border-radius: 4px; padding: 16px; margin-bottom: 16px; text-align: center; }
-    .coffee-address { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--accent); word-break: break-all; margin-bottom: 8px; }
-    .coffee-network { font-size: 0.7rem; color: var(--muted); margin-bottom: 8px; font-family: 'Space Mono', monospace; }
+    /* SIDE MENU */
+    .menu-overlay { position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:150; opacity:0; pointer-events:none; transition:opacity .3s; backdrop-filter:blur(4px); }
+    .menu-overlay.open { opacity:1; pointer-events:all; }
+    .side-menu { position:fixed; top:0; left:-300px; width:280px; height:100vh; background:var(--surface); border-right:1px solid var(--border); z-index:160; transition:left .3s ease; padding:70px 0 30px; display:flex; flex-direction:column; }
+    .side-menu.open { left:0; box-shadow:8px 0 40px rgba(0,0,0,.6); }
+    .menu-section { font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:3px; color:var(--muted); padding:0 24px 10px; }
+    .menu-item { display:flex; align-items:center; gap:14px; padding:13px 24px; color:var(--text); font-size:.88rem; cursor:pointer; border:none; background:none; width:100%; text-align:left; border-left:2px solid transparent; transition:all .2s; font-family:'DM Sans',sans-serif; }
+    .menu-item:hover { background:rgba(240,224,64,.04); border-left-color:var(--accent); color:var(--accent); }
+    .menu-divider { height:1px; background:var(--border); margin:8px 24px; }
+    .menu-coffee { margin-top:auto; background:linear-gradient(135deg,#111100,#1a1a00) !important; border-left:2px solid var(--accent) !important; color:var(--accent) !important; font-family:'Space Mono',monospace !important; font-size:.75rem !important; letter-spacing:1px; }
 
-    /* REFERRAL */
-    .referral-bar { position: relative; z-index: 10; background: linear-gradient(135deg, #0d0d00, #1a1a00); border-bottom: 1px solid var(--accent); padding: 12px 40px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .referral-bar .ref-text { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--accent); }
-    .referral-bar .ref-text span { color: var(--muted); }
-    .ref-link-wrap { display: flex; align-items: center; gap: 8px; flex: 1; max-width: 400px; }
-    .ref-link-input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.65rem; outline: none; }
-    .ref-copy-btn { padding: 8px 14px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.65rem; cursor: pointer; font-weight: 700; white-space: nowrap; transition: all 0.2s; }
-    .ref-copy-btn:hover { background: #fff; }
-    .ref-stats { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); white-space: nowrap; }
-    .ref-stats b { color: #4dff88; }
-    .free-tile-toast { position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #0d2000, #1a3300); border: 1px solid #4dff88; border-radius: 4px; padding: 16px 24px; z-index: 300; font-family: 'Space Mono', monospace; font-size: 0.8rem; color: #4dff88; box-shadow: 0 0 30px rgba(77,255,136,0.3); animation: slideInRight 0.4s ease; display: none; }
-    .free-tile-toast.show { display: block; }
-    @keyframes slideInRight { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .discount-badge { display: inline-block; background: var(--accent2); color: #fff; font-family: 'Space Mono', monospace; font-size: 0.6rem; padding: 2px 6px; border-radius: 3px; margin-left: 6px; vertical-align: middle; }
+    /* WALLET BAR */
+    .wallet-bar { position:relative; z-index:10; background:var(--surface); border-bottom:1px solid var(--border); padding:10px 40px; display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+    .wallet-connected { display:none; align-items:center; gap:16px; }
+    .wallet-addr { font-family:'Space Mono',monospace; font-size:.7rem; color:var(--muted); }
+    .wallet-addr b { color:var(--text); }
+    .wallet-bal { font-family:'Space Mono',monospace; font-size:.9rem; color:var(--accent); font-weight:700; }
+    .wallet-bal small { color:var(--muted); font-size:.6rem; font-weight:400; }
+    .btn-connect { padding:8px 16px; background:none; border:1px solid var(--accent); color:var(--accent); border-radius:3px; font-family:'Space Mono',monospace; font-size:.68rem; cursor:pointer; transition:all .2s; letter-spacing:1px; }
+    .btn-connect:hover { background:rgba(240,224,64,.1); }
+    .btn-deposit { padding:8px 18px; background:var(--accent); color:#000; border:none; border-radius:3px; font-family:'Bebas Neue',sans-serif; font-size:1rem; letter-spacing:2px; cursor:pointer; transition:all .2s; display:none; }
+    .btn-deposit:hover { background:#fff; transform:translateY(-1px); box-shadow:0 4px 20px rgba(240,224,64,.3); }
 
-    /* WALLET SYSTEM */
-    .wallet-bar { position: relative; z-index: 10; background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 40px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .wallet-info { display: flex; align-items: center; gap: 12px; }
-    .wallet-address-short { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--muted); }
-    .wallet-address-short b { color: var(--text); }
-    .wallet-balance { font-family: 'Space Mono', monospace; font-size: 0.85rem; color: var(--accent); font-weight: 700; }
-    .wallet-balance span { color: var(--muted); font-size: 0.65rem; font-weight: 400; }
-    .btn-deposit { padding: 8px 16px; background: var(--accent); color: #000; border: none; border-radius: 4px; font-family: 'Bebas Neue', sans-serif; font-size: 0.9rem; letter-spacing: 2px; cursor: pointer; transition: all 0.2s; }
-    .btn-deposit:hover { background: #fff; }
-    .btn-connect { padding: 8px 16px; background: none; border: 1px solid var(--accent); color: var(--accent); border-radius: 4px; font-family: 'Space Mono', monospace; font-size: 0.7rem; cursor: pointer; transition: all 0.2s; }
-    .btn-connect:hover { background: rgba(240,224,64,0.1); }
+    /* REFERRAL BAR */
+    .ref-bar { position:relative; z-index:10; background:linear-gradient(135deg,#090900,#111100); border-bottom:1px solid rgba(240,224,64,.2); padding:10px 40px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+    .ref-label { font-family:'Space Mono',monospace; font-size:.68rem; color:var(--accent); white-space:nowrap; }
+    .ref-label span { color:var(--muted); }
+    .ref-input-wrap { display:flex; gap:8px; flex:1; max-width:400px; }
+    .ref-input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:3px; padding:7px 12px; color:var(--muted); font-family:'Space Mono',monospace; font-size:.62rem; outline:none; }
+    .ref-copy { padding:7px 14px; background:var(--accent); color:#000; border:none; border-radius:3px; font-family:'Space Mono',monospace; font-size:.62rem; cursor:pointer; font-weight:700; white-space:nowrap; transition:all .2s; }
+    .ref-copy:hover { background:#fff; }
+    .ref-earned { font-family:'Space Mono',monospace; font-size:.68rem; color:var(--muted); white-space:nowrap; }
+    .ref-earned b { color:var(--green); }
 
-    /* CONNECT MODAL */
-    .connect-modal h2 { color: var(--accent); }
-    .wallet-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-    .wallet-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; cursor: pointer; transition: all 0.2s; font-size: 0.85rem; }
-    .wallet-option:hover { border-color: var(--accent); color: var(--accent); }
-    .wallet-option .w-icon { font-size: 1.3rem; }
-    .manual-wallet-wrap { margin-top: 16px; }
-    .manual-wallet-wrap label { display: block; font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 8px; }
-    .manual-wallet-wrap input { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 0.75rem; outline: none; transition: border-color 0.2s; }
-    .manual-wallet-wrap input:focus { border-color: var(--accent); }
+    /* TICKER */
+    .ticker { position:relative; z-index:10; background:var(--accent); color:#000; padding:7px 0; overflow:hidden; font-family:'Space Mono',monospace; font-size:.65rem; letter-spacing:2px; white-space:nowrap; }
+    .ticker-track { display:inline-block; animation:ticker 30s linear infinite; }
+    @keyframes ticker { from{transform:translateX(100vw)} to{transform:translateX(-100%)} }
 
-    /* DEPOSIT MODAL */
-    .deposit-modal h2 { color: var(--accent); }
-    .deposit-amounts { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
-    .deposit-btn { flex: 1; min-width: 70px; padding: 12px 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--muted); font-family: 'Space Mono', monospace; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; text-align: center; }
-    .deposit-btn:hover, .deposit-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(240,224,64,0.05); }
-    .deposit-btn b { display: block; font-size: 1rem; color: var(--text); margin-bottom: 2px; }
-    .balance-preview { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 12px 16px; margin-bottom: 16px; font-family: 'Space Mono', monospace; font-size: 0.75rem; }
-    .balance-preview div { display: flex; justify-content: space-between; padding: 3px 0; color: var(--muted); }
-    .balance-preview div span:last-child { color: var(--accent); }
+    /* CATEGORIES */
+    .cats-wrap { position:relative; z-index:10; padding:24px 40px 0; }
+    .cats-label { font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:3px; color:var(--muted); margin-bottom:12px; }
+    .cats { display:flex; gap:10px; flex-wrap:wrap; }
+    .cat { padding:9px 18px; background:var(--surface); border:1px solid var(--border); border-radius:3px; color:var(--muted); font-family:'Space Mono',monospace; font-size:.68rem; cursor:pointer; transition:all .2s; letter-spacing:1px; }
+    .cat:hover { border-color:var(--accent); color:var(--accent); }
+    .cat.active { background:var(--accent); color:#000; border-color:var(--accent); font-weight:700; }
 
-    /* DEPOSIT FLOW */
-    .coin-btn-large { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; transition: all 0.2s; text-align: left; font-family: 'DM Sans', sans-serif; }
-    .coin-btn-large:hover { border-color: var(--accent); }
-    .coin-btn-large.active { border-color: var(--accent); background: rgba(240,224,64,0.05); }
-    .coin-btn-large div { flex: 1; }
-    .coin-btn-large b { display: block; font-size: 0.9rem; color: var(--text); }
-    .coin-btn-large span:nth-child(2) { font-size: 0.75rem; color: var(--muted); }
-    .coin-check { color: var(--accent); font-size: 1rem; }
-    .step-progress { display: flex; gap: 6px; margin-bottom: 20px; }
-    .step-dot { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
-    .step-dot.active { background: var(--accent); }
+    /* IMAGE SELECTOR */
+    .img-sel-wrap { position:relative; z-index:10; padding:16px 40px 0; }
+    .img-sel-label { font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:3px; color:var(--muted); margin-bottom:10px; }
+    .img-sel { display:flex; gap:8px; overflow-x:auto; padding-bottom:6px; }
+    .img-sel::-webkit-scrollbar { height:2px; }
+    .img-sel::-webkit-scrollbar-thumb { background:var(--border); }
+    .img-thumb { width:80px; height:60px; border:2px solid var(--border); border-radius:3px; cursor:pointer; overflow:hidden; flex-shrink:0; transition:all .2s; position:relative; }
+    .img-thumb img { width:100%; height:100%; object-fit:cover; filter:blur(8px); transform:scale(1.1); }
+    .img-thumb:hover { border-color:var(--accent); }
+    .img-thumb.active { border-color:var(--accent); box-shadow:0 0 12px rgba(240,224,64,.4); }
+    .img-thumb .num { position:absolute; bottom:2px; right:4px; font-family:'Space Mono',monospace; font-size:.5rem; color:var(--accent); text-shadow:0 0 4px #000; }
+    .img-placeholder { width:80px; height:60px; background:var(--surface); border:2px solid var(--border); border-radius:3px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+    .img-placeholder::after { content:''; width:6px; height:6px; background:var(--muted); border-radius:50%; animation:blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+    /* HERO */
+    .hero { position:relative; z-index:10; text-align:center; padding:28px 40px 20px; }
+    .hero h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(2.2rem,5vw,4.5rem); letter-spacing:6px; line-height:1; margin-bottom:10px; }
+    .hero h1 em { color:var(--accent); font-style:normal; }
+    .hero p { color:var(--muted); font-size:.88rem; max-width:440px; margin:0 auto 18px; line-height:1.7; }
+    .prize-pill { display:inline-flex; align-items:center; gap:10px; background:linear-gradient(135deg,#111100,#1a1a00); border:1px solid var(--accent); border-radius:3px; padding:10px 24px; font-family:'Space Mono',monospace; font-size:.75rem; color:var(--accent); box-shadow:0 0 24px rgba(240,224,64,.12); }
+    .prize-pill .amt { font-size:1.4rem; font-weight:700; }
+
+    /* MAIN LAYOUT */
+    .main { position:relative; z-index:10; display:grid; grid-template-columns:1fr 300px; gap:28px; padding:24px 40px; max-width:1200px; margin:0 auto; }
+
+    /* PUZZLE */
+    .puzzle-wrap { position:relative; }
+    .puzzle-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-family:'Space Mono',monospace; font-size:.65rem; color:var(--muted); }
+    .puzzle-top span { color:var(--accent); }
+    .puzzle-box { position:relative; width:100%; aspect-ratio:1; border:1px solid var(--border); border-radius:4px; overflow:hidden; background:#080808; }
+    #puzzle-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; filter:blur(20px); transform:scale(1.1); transition:filter 1s ease,transform 1s ease; }
+    #puzzle-img.revealed { filter:blur(0) !important; transform:scale(1) !important; }
+    .grid { position:absolute; inset:0; display:grid; grid-template-columns:repeat(10,1fr); grid-template-rows:repeat(10,1fr); }
+    .tile { border:1px solid rgba(255,255,255,.04); background:rgba(6,6,6,.92); cursor:pointer; transition:all .15s; }
+    .tile:hover { background:rgba(40,40,40,.9); border-color:var(--accent); transform:scale(1.06); z-index:2; box-shadow:0 0 10px rgba(240,224,64,.25); }
+    .tile.revealed { background:transparent !important; border-color:transparent !important; cursor:default; pointer-events:none; }
+    .tile.last { border-color:var(--accent2) !important; animation:last-pulse 1s infinite; }
+    @keyframes last-pulse { 0%,100%{box-shadow:0 0 8px rgba(255,68,68,.4)} 50%{box-shadow:0 0 20px rgba(255,68,68,.8)} }
+
+    /* SIDEBAR */
+    .sidebar { display:flex; flex-direction:column; gap:16px; }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:4px; padding:20px; }
+    .card-title { font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:3px; color:var(--muted); margin-bottom:14px; }
+    .prog-bar { width:100%; height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:8px; }
+    .prog-fill { height:100%; background:linear-gradient(90deg,var(--accent),#ffaa00); border-radius:2px; transition:width .6s ease; width:0%; }
+    .prog-text { display:flex; justify-content:space-between; font-family:'Space Mono',monospace; font-size:.65rem; color:var(--muted); }
+    .prog-text span:first-child { color:var(--accent); font-size:1rem; font-weight:700; }
+    .prize-big { text-align:center; padding:16px 0; border-bottom:1px solid var(--border); margin-bottom:14px; }
+    .prize-big .val { font-family:'Bebas Neue',sans-serif; font-size:2.6rem; color:var(--accent); display:block; text-shadow:0 0 20px rgba(240,224,64,.3); }
+    .prize-big small { font-family:'Space Mono',monospace; font-size:.6rem; color:var(--muted); }
+    .prize-rule { font-size:.75rem; color:var(--muted); line-height:1.6; border-left:2px solid var(--accent); padding-left:12px; }
+    .btn-reveal { width:100%; padding:16px; background:var(--accent); color:#000; border:none; border-radius:3px; font-family:'Bebas Neue',sans-serif; font-size:1.3rem; letter-spacing:3px; cursor:pointer; transition:all .2s; position:relative; overflow:hidden; }
+    .btn-reveal::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent); transition:left .4s; }
+    .btn-reveal:hover::before { left:100%; }
+    .btn-reveal:hover { background:#fff; box-shadow:0 0 30px rgba(240,224,64,.4); transform:translateY(-1px); }
+    .btn-reveal:disabled { background:var(--border); color:var(--muted); cursor:not-allowed; transform:none; box-shadow:none; }
+    .crypto-note { font-family:'Space Mono',monospace; font-size:.62rem; color:var(--muted); text-align:center; margin-top:8px; }
+    .activity { display:flex; flex-direction:column; gap:8px; max-height:160px; overflow-y:auto; }
+    .activity::-webkit-scrollbar { width:2px; }
+    .activity::-webkit-scrollbar-thumb { background:var(--border); }
+    .act-item { display:flex; align-items:center; gap:8px; font-size:.72rem; animation:slide-in .3s ease; }
+    @keyframes slide-in { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+    .act-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); flex-shrink:0; }
+    .act-text { color:var(--muted); flex:1; }
+    .act-text b { color:var(--text); }
+    .act-time { font-family:'Space Mono',monospace; font-size:.58rem; color:var(--border); }
+
+    /* MODALS */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.88); z-index:200; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(6px); opacity:0; pointer-events:none; transition:opacity .3s; }
+    .overlay.open { opacity:1; pointer-events:all; }
+    .modal { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:36px; max-width:460px; width:90%; position:relative; transform:scale(.96); transition:transform .3s; max-height:90vh; overflow-y:auto; }
+    .modal::-webkit-scrollbar { width:3px; }
+    .modal::-webkit-scrollbar-thumb { background:var(--border); }
+    .overlay.open .modal { transform:scale(1); }
+    .modal.accent-border { border-color:var(--accent); box-shadow:0 0 60px rgba(240,224,64,.1); }
+    .modal-close { position:absolute; top:14px; right:14px; background:none; border:none; color:var(--muted); font-size:1.1rem; cursor:pointer; font-family:'Space Mono',monospace; }
+    .modal-close:hover { color:var(--text); }
+    .modal h2 { font-family:'Bebas Neue',sans-serif; font-size:1.9rem; letter-spacing:3px; color:var(--accent); margin-bottom:6px; }
+    .modal p { color:var(--muted); font-size:.82rem; line-height:1.65; margin-bottom:20px; }
+
+    /* FORM ELEMENTS */
+    .field { margin-bottom:16px; }
+    .field label { display:block; font-family:'Space Mono',monospace; font-size:.6rem; letter-spacing:2px; color:var(--muted); margin-bottom:7px; }
+    .field input { width:100%; background:var(--bg); border:1px solid var(--border); border-radius:3px; padding:11px 14px; color:var(--text); font-family:'Space Mono',monospace; font-size:.75rem; outline:none; transition:border-color .2s; }
+    .field input:focus { border-color:var(--accent); }
+    .field input::placeholder { color:var(--muted); }
+    .field input.err { border-color:var(--accent2); }
+    .btn-full { width:100%; padding:13px; background:var(--accent); color:#000; border:none; border-radius:3px; font-family:'Bebas Neue',sans-serif; font-size:1.15rem; letter-spacing:3px; cursor:pointer; transition:all .2s; }
+    .btn-full:hover { background:#fff; box-shadow:0 0 20px rgba(240,224,64,.3); }
+    .btn-full:disabled { background:var(--border); color:var(--muted); cursor:not-allowed; }
+    .btn-ghost { width:100%; padding:13px; background:var(--border); color:var(--muted); border:none; border-radius:3px; font-family:'Bebas Neue',sans-serif; font-size:1.15rem; letter-spacing:3px; cursor:pointer; transition:all .2s; }
+    .btn-ghost:hover { background:#2a2a2a; color:var(--text); }
+    .btn-row { display:flex; gap:10px; }
+    .btn-row .btn-ghost { flex:1; }
+    .btn-row .btn-full { flex:2; }
+
+    /* INFO TABLE */
+    .info-table { background:var(--bg); border:1px solid var(--border); border-radius:3px; padding:14px; margin-bottom:16px; font-family:'Space Mono',monospace; font-size:.7rem; }
+    .info-table div { display:flex; justify-content:space-between; padding:3px 0; color:var(--muted); }
+    .info-table div span:last-child { color:var(--text); }
+    .info-table div span.green { color:var(--green); }
+    .info-table div span.accent { color:var(--accent); }
 
     /* DEPOSIT STEPS */
-    .dep-steps { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
-    .dep-step { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); }
-    .dep-step.active { color: var(--accent); border-color: var(--accent); background: rgba(240,224,64,0.05); }
-    .dep-step-arrow { color: var(--muted); font-size: 0.7rem; }
-    .coin-btn-large { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; transition: all 0.2s; text-align: left; font-family: 'DM Sans', sans-serif; }
-    .coin-btn-large:hover { border-color: var(--accent); }
-    .coin-btn-large.active { border-color: var(--accent); background: rgba(240,224,64,0.05); }
-    .coin-btn-large div { flex: 1; }
-    .coin-btn-large b { display: block; font-size: 0.9rem; color: var(--text); }
-    .coin-btn-large small { font-size: 0.72rem; color: var(--muted); }
-    .ccheck { color: var(--accent); font-size: 1rem; }
+    .steps-nav { display:flex; align-items:center; gap:6px; margin-bottom:22px; }
+    .step-pill { font-family:'Space Mono',monospace; font-size:.58rem; color:var(--muted); padding:3px 10px; border:1px solid var(--border); border-radius:20px; transition:all .2s; white-space:nowrap; }
+    .step-pill.active { color:var(--accent); border-color:var(--accent); background:rgba(240,224,64,.06); }
+    .step-pill.done { color:var(--green); border-color:var(--green); }
+    .step-arrow { color:var(--border); font-size:.7rem; }
+
+    /* TILE AMOUNTS */
+    .tile-grid-sel { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:18px; }
+    .tile-opt { padding:14px 8px; background:var(--bg); border:1px solid var(--border); border-radius:3px; cursor:pointer; text-align:center; transition:all .2s; font-family:'Space Mono',monospace; }
+    .tile-opt:hover { border-color:var(--accent); }
+    .tile-opt.active { border-color:var(--accent); background:rgba(240,224,64,.06); }
+    .tile-opt .tile-count { display:block; font-size:1.1rem; font-weight:700; color:var(--text); margin-bottom:2px; }
+    .tile-opt .tile-price { display:block; font-size:.62rem; color:var(--muted); }
+    .tile-opt .tile-badge { display:block; font-size:.55rem; color:var(--accent); margin-top:2px; }
+
+    /* COIN OPTIONS */
+    .coin-opts { display:flex; flex-direction:column; gap:8px; margin-bottom:18px; }
+    .coin-opt { display:flex; align-items:center; gap:14px; padding:13px 14px; background:var(--bg); border:1px solid var(--border); border-radius:3px; cursor:pointer; transition:all .2s; }
+    .coin-opt:hover { border-color:var(--accent); }
+    .coin-opt.active { border-color:var(--accent); background:rgba(240,224,64,.05); }
+    .coin-opt .coin-icon { font-size:1.3rem; flex-shrink:0; }
+    .coin-opt .coin-info { flex:1; }
+    .coin-opt .coin-name { display:block; font-family:'Space Mono',monospace; font-size:.8rem; color:var(--text); }
+    .coin-opt .coin-sub { display:block; font-size:.68rem; color:var(--muted); margin-top:1px; }
+    .coin-opt .coin-check { color:var(--accent); font-size:.9rem; opacity:0; transition:opacity .2s; }
+    .coin-opt.active .coin-check { opacity:1; }
+
+    /* PAYMENT ADDRESS */
+    .pay-addr-box { background:var(--bg); border:1px solid var(--accent); border-radius:4px; padding:16px; text-align:center; margin-bottom:14px; }
+    .pay-addr { font-family:'Space Mono',monospace; font-size:.58rem; color:var(--accent); word-break:break-all; margin-bottom:10px; line-height:1.5; }
+    .pay-copy { background:none; border:1px solid var(--border); color:var(--muted); padding:5px 14px; border-radius:3px; font-family:'Space Mono',monospace; font-size:.62rem; cursor:pointer; transition:all .2s; }
+    .pay-copy:hover { border-color:var(--accent); color:var(--accent); }
+    .status-badge { display:inline-block; padding:4px 12px; border-radius:3px; font-family:'Space Mono',monospace; font-size:.65rem; }
+    .status-wait { background:rgba(240,224,64,.1); color:var(--accent); border:1px solid rgba(240,224,64,.3); }
+    .status-ok { background:rgba(77,255,136,.1); color:var(--green); border:1px solid rgba(77,255,136,.3); }
+    .status-err { background:rgba(255,68,68,.1); color:var(--accent2); border:1px solid rgba(255,68,68,.3); }
+
+    /* TOAST */
+    .toast { position:fixed; bottom:28px; right:28px; background:linear-gradient(135deg,#050f00,#0a1f00); border:1px solid var(--green); border-radius:4px; padding:14px 20px; z-index:500; font-family:'Space Mono',monospace; font-size:.75rem; color:var(--green); box-shadow:0 0 30px rgba(77,255,136,.2); transform:translateX(120px); opacity:0; transition:all .4s ease; pointer-events:none; }
+    .toast.show { transform:translateX(0); opacity:1; }
+
+    /* CONFETTI */
+    .confetti { position:fixed; z-index:600; animation:fall 3s ease-in forwards; pointer-events:none; }
+    @keyframes fall { 0%{transform:translateY(-20px) rotate(0deg);opacity:1} 100%{transform:translateY(100vh) rotate(720deg);opacity:0} }
+
+    /* RESPONSIVE */
+    @media(max-width:768px) {
+      header,
+      .wallet-bar,
+      .ref-bar,
+      .cats-wrap,
+      .img-sel-wrap,
+      .hero { padding-left:20px; padding-right:20px; }
+      .main { grid-template-columns:1fr; padding:16px 20px; }
+      .header-stats { display:none; }
+    }
   </style>
 </head>
 <body>
 
 <!-- LOADING -->
-<div class="loading-overlay" id="loading-overlay">
-  <div class="loading-logo">HiddenDrop</div>
-  <div class="loading-text" id="loading-text">Loading...</div>
+<div id="loading">
+  <div class="load-logo">HiddenDrop</div>
+  <div class="load-bar"><div class="load-bar-fill"></div></div>
+  <div class="load-text" id="load-text">INITIALIZING...</div>
 </div>
 
-<!-- SIDE MENU OVERLAY -->
-<div class="side-menu-overlay" id="menu-overlay"></div>
+<!-- MENU OVERLAY -->
+<div class="menu-overlay" id="menu-overlay"></div>
 
 <!-- SIDE MENU -->
 <div class="side-menu" id="side-menu">
-  <div class="menu-label">// menu</div>
-  <button class="menu-item" onclick="document.getElementById('privacy-modal').classList.add('active');closeMenu()">
-    <span class="menu-icon">🔒</span> Privacy Policy
-  </button>
-  <button class="menu-item" onclick="document.getElementById('security-modal').classList.add('active');closeMenu()">
-    <span class="menu-icon">🛡️</span> Security
-  </button>
-  <button class="menu-item" onclick="document.getElementById('howto-modal').classList.add('active');closeMenu()">
-    <span class="menu-icon">❓</span> How it works
-  </button>
+  <div class="menu-section">// MENU</div>
+  <button class="menu-item" onclick="openModal('how-modal');closeMenu()">❓ How It Works</button>
+  <button class="menu-item" onclick="openModal('privacy-modal');closeMenu()">🔒 Privacy Policy</button>
+  <button class="menu-item" onclick="openModal('security-modal');closeMenu()">🛡️ Security</button>
   <div class="menu-divider"></div>
-  <button class="menu-item coffee" onclick="document.getElementById('coffee-modal').classList.add('active');closeMenu()">
-    <span class="menu-icon">☕</span> BUY ME A COFFEE
-  </button>
+  <button class="menu-item menu-coffee" onclick="openModal('coffee-modal');closeMenu()">☕ BUY ME A COFFEE</button>
 </div>
 
 <!-- HEADER -->
@@ -298,1277 +288,886 @@
     <span></span><span></span><span></span>
   </button>
   <div class="logo">Hidden<span>Drop</span></div>
-  <div class="header-stats">
-    <div><b id="stat-revealed">0</b>revealed</div>
-    <div><b id="stat-remaining">100</b>left</div>
-    <div><b id="stat-prize">$0.00</b>prize</div>
+  <div class="header-right">
+    <div class="header-stats">
+      <div><b id="s-revealed">0</b>revealed</div>
+      <div><b id="s-remaining">100</b>left</div>
+      <div><b id="s-prize">$0</b>prize</div>
+    </div>
   </div>
 </header>
 
-<!-- TICKER -->
-<div class="ticker">
-  <span class="ticker-inner">🔒 HIDDENDROP — REVEAL TILES TO UNCOVER THE MYSTERY IMAGE — LAST TILE WINS THE PRIZE — PAY WITH CRYPTO — 🏆 WHO WILL WIN? 🔒</span>
-</div>
-
-
-
 <!-- WALLET BAR -->
-<div class="wallet-bar" id="wallet-bar">
-  <div class="wallet-info" id="wallet-info-connected" style="display:none;">
-    <div class="wallet-address-short">👤 <b id="wallet-short">0x00...0000</b></div>
-    <div class="wallet-balance" id="wallet-balance-display">$0.00 <span>USDT</span></div>
+<div class="wallet-bar">
+  <div class="wallet-connected" id="wallet-connected">
+    <div class="wallet-addr">👤 <b id="wallet-short">—</b></div>
+    <div class="wallet-bal" id="wallet-bal">$0.00 <small>USDT</small></div>
   </div>
-  <div id="wallet-info-disconnected">
-    <span style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted);">Connect your wallet to play</span>
+  <div id="wallet-disconnected">
+    <span style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted)">Connect wallet to play</span>
   </div>
-  <div style="display:flex;gap:10px;align-items:center;">
-    <button class="btn-connect" id="connect-wallet-btn">🔗 CONNECT WALLET</button>
-    <button class="btn-deposit" id="deposit-btn" style="display:none;">+ DEPOSIT</button>
+  <div style="display:flex;gap:10px;align-items:center">
+    <button class="btn-connect" id="btn-connect">🔗 CONNECT WALLET</button>
+    <button class="btn-deposit" id="btn-deposit">+ DEPOSIT</button>
   </div>
 </div>
 
 <!-- REFERRAL BAR -->
-<div class="referral-bar" id="referral-bar">
-  <div class="ref-text">🎁 <span>Share your link — when a friend buys a tile, </span>YOU GET ONE FREE!</div>
-  <div class="ref-link-wrap">
-    <input class="ref-link-input" id="ref-link-input" readonly value="Loading..." />
-    <button class="ref-copy-btn" id="ref-copy-btn">COPY LINK</button>
+<div class="ref-bar">
+  <div class="ref-label">🎁 <span>Share & earn free tiles when friends buy:</span></div>
+  <div class="ref-input-wrap">
+    <input class="ref-input" id="ref-link" readonly value="Loading..."/>
+    <button class="ref-copy" id="ref-copy">COPY</button>
   </div>
-  <div class="ref-stats">Free tiles earned: <b id="free-tiles-count">0</b></div>
+  <div class="ref-earned">Free tiles: <b id="free-count">0</b></div>
 </div>
 
-<!-- FREE TILE TOAST -->
-<div class="free-tile-toast" id="free-tile-toast">
-  🎉 You earned a FREE tile!<br/>
-  <span style="color:var(--muted);font-size:0.65rem;">Your referral just bought a tile</span>
+<!-- TICKER -->
+<div class="ticker">
+  <span class="ticker-track">🔒 HIDDENDROP — REVEAL TILES — IMAGE STAYS BLURRED UNTIL THE LAST TILE — LAST TILE WINS 20% OF PRIZE POOL — PAY WITH CRYPTO — WHO WILL CRACK THE CODE? 🏆 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
 </div>
 
 <!-- CATEGORIES -->
-<div class="categories-wrap">
-  <div class="categories-label">// choose a category</div>
-  <div class="categories">
-    <button class="cat-btn active" data-cat="stadiums" data-query="football stadium aerial">🏟️ Stadiums</button>
-    <button class="cat-btn" data-cat="supercars" data-query="supercar exotic car">🚗 Supercars</button>
-    <button class="cat-btn" data-cat="cities" data-query="city aerial night lights">🌆 Cities</button>
-    <button class="cat-btn" data-cat="nature" data-query="nature landscape beautiful">🌿 Nature</button>
-    <button class="cat-btn" data-cat="random" data-query="abstract colorful art">🎲 Random</button>
+<div class="cats-wrap">
+  <div class="cats-label">// CATEGORY</div>
+  <div class="cats">
+    <button class="cat active" data-cat="stadiums" data-q="football stadium aerial view">🏟 Stadiums</button>
+    <button class="cat" data-cat="supercars" data-q="exotic supercar sports car">🚗 Supercars</button>
+    <button class="cat" data-cat="cities" data-q="city skyline aerial night">🌆 Cities</button>
+    <button class="cat" data-cat="nature" data-q="nature landscape mountains">🌿 Nature</button>
+    <button class="cat" data-cat="random" data-q="abstract colorful art pattern">🎲 Random</button>
   </div>
 </div>
 
 <!-- IMAGE SELECTOR -->
-<div class="image-selector-wrap">
-  <div class="image-selector-label">// select image to reveal</div>
-  <div class="image-selector" id="image-selector">
-    <!-- thumbnails loaded dynamically -->
-  </div>
+<div class="img-sel-wrap">
+  <div class="img-sel-label">// SELECT IMAGE</div>
+  <div class="img-sel" id="img-sel"></div>
 </div>
 
 <!-- HERO -->
 <div class="hero">
-  <h1>REVEAL THE<br/><em id="current-cat-name">STADIUM</em></h1>
-  <p>Each tile hides part of a mystery image. The image stays blurred until the very last tile is revealed!</p>
-  <div class="prize-badge">
-    <span>🏆 PRIZE</span>
-    <span class="amount" id="hero-prize">$0.00</span>
-    <span>USDT</span>
-  </div>
+  <h1>REVEAL THE <em id="cat-name">STADIUM</em></h1>
+  <p>Every tile hides part of a mystery image. The image stays fully blurred until the very last tile is revealed.</p>
+  <div class="prize-pill">🏆 PRIZE POOL <span class="amt" id="hero-prize">$0.00</span> USDT</div>
 </div>
 
 <!-- MAIN -->
 <div class="main">
+  <!-- PUZZLE -->
   <div class="puzzle-wrap">
-    <div class="puzzle-label">
-      <span>// <span id="puzzle-label-text">select an image above</span></span>
-      <span class="current-img-name" id="current-img-name"></span>
+    <div class="puzzle-top">
+      <span>// 100 TILES — $3 EACH</span>
+      <span id="puzzle-img-label"></span>
     </div>
-    <div class="puzzle-container">
-      <img id="puzzle-image" class="puzzle-image" src="" alt="mystery" />
-      <div class="tile-grid" id="tile-grid"></div>
+    <div class="puzzle-box">
+      <img id="puzzle-img" src="" alt="mystery"/>
+      <div class="grid" id="grid"></div>
     </div>
   </div>
 
+  <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="card">
-      <div class="card-title">// progress</div>
-      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-      <div class="progress-text">
-        <span id="revealed-num">0</span>
-        <span id="remaining-num">100 left</span>
-      </div>
+      <div class="card-title">// PROGRESS</div>
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="prog-text"><span id="prog-revealed">0</span><span id="prog-left">100 left</span></div>
     </div>
 
     <div class="card">
-      <div class="card-title">// prize pool</div>
-      <div class="prize-info">
-        <span class="prize-amount" id="prize-amount">$0.00</span>
-        <span class="prize-label">USDT · LIVE</span>
+      <div class="card-title">// PRIZE POOL</div>
+      <div class="prize-big">
+        <span class="val" id="prize-val">$0.00</span>
+        <small>USDT · LIVE</small>
       </div>
-      <p class="prize-rule">The player who reveals the <strong style="color:var(--accent)">last tile</strong> wins <strong style="color:var(--accent)">20%</strong> of the total prize pool instantly.</p>
+      <p class="prize-rule">The player who reveals the <strong style="color:var(--accent)">last tile</strong> wins <strong style="color:var(--accent)">20%</strong> of the prize pool instantly.</p>
     </div>
 
     <div class="card">
-      <div class="card-title">// reveal a tile</div>
-      <div class="buy-section">
-        <div class="price-display"><span>Per tile</span><strong>$3.00 USDT</strong></div>
-        <button class="btn-buy" id="buy-btn">REVEAL A TILE</button>
-        <div class="crypto-note">NOWPayments · Crypto only</div>
+      <div class="card-title">// REVEAL A TILE</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;font-family:'Space Mono',monospace;font-size:.72rem;color:var(--muted);margin-bottom:14px;">
+        <span>Cost per tile</span><strong style="color:var(--text);font-size:.9rem;">$3.00 USDT</strong>
       </div>
+      <button class="btn-reveal" id="btn-reveal">REVEAL A TILE</button>
+      <div class="crypto-note">⚡ NOWPayments · Crypto only</div>
     </div>
 
     <div class="card">
-      <div class="card-title">// live activity</div>
-      <div class="activity-list" id="activity-list">
-        <div style="color:var(--muted);font-size:0.8rem;font-family:'Space Mono',monospace;text-align:center;">No activity yet</div>
+      <div class="card-title">// LIVE ACTIVITY</div>
+      <div class="activity" id="activity">
+        <div style="color:var(--muted);font-size:.75rem;font-family:'Space Mono',monospace;text-align:center">No activity yet</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- BUY MODAL -->
-<div class="modal-overlay" id="buy-modal">
-  <div class="modal">
-    <button class="modal-close" id="modal-close">✕</button>
-    <h2>Reveal a Tile</h2>
-    <p>Pay $3 USDT to reveal a random tile. The image stays blurred until ALL tiles are revealed. Last tile wins the prize!</p>
-    <div class="tile-info">
-      <div><span>Price</span><span>$3.00 USDT</span></div>
-      <div><span>Tiles remaining</span><span id="modal-remaining">100</span></div>
-      <div><span>Win chance</span><span id="modal-chance">1%</span></div>
-      <div><span>Prize pool</span><span id="modal-prize">$0.00</span></div>
-    </div>
-    <div class="wallet-input-wrap">
-      <label>YOUR WALLET (to receive prize if you win)</label>
-      <input type="text" id="wallet-input" placeholder="Your crypto wallet address" />
-    </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
-      <div class="coin-select">
-        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
-        <button class="coin-btn" data-coin="btc">BTC</button>
-        <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn active" data-coin="trx">TRX</button>
-      </div>
-    </div>
-    <div id="free-tile-notice" style="display:none;background:linear-gradient(135deg,#0d2000,#1a3300);border:1px solid #4dff88;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:0.75rem;color:#4dff88;text-align:center;">
-  🎁 You have <b id="free-tiles-available">0</b> free tile(s)! Use one instead of paying?
-  <br/><button onclick="useFreeeTile()" style="margin-top:8px;background:#4dff88;color:#000;border:none;border-radius:4px;padding:6px 16px;font-family:'Space Mono',monospace;font-size:0.7rem;cursor:pointer;font-weight:700;">USE FREE TILE</button>
-</div>
-<button class="btn-confirm" id="confirm-pay">PAY $3 & REVEAL</button>
-  </div>
-</div>
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- MODALS -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 
-<!-- PAYMENT MODAL -->
-<div class="modal-overlay" id="payment-modal">
-  <div class="modal">
-    <button class="modal-close" id="payment-close">✕</button>
-    <h2>Complete Payment</h2>
-    <p>Send exactly the amount below. Your tile reveals automatically after confirmation.</p>
-    <div class="tile-info">
-      <div><span>Amount</span><span id="pay-amount">—</span></div>
-      <div><span>Network</span><span id="pay-network">—</span></div>
-      <div><span>Status</span><span id="pay-status"><span class="status-badge status-waiting">Waiting...</span></span></div>
-    </div>
-    <div class="payment-address-box">
-      <div class="address" id="pay-address">Generating...</div>
-      <button class="copy-btn" id="copy-address-btn">Copy Address</button>
-    </div>
-    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Waiting for blockchain confirmation (1-5 min)</p>
-  </div>
-</div>
-
-<!-- CONNECT WALLET MODAL -->
-<div class="modal-overlay" id="connect-modal">
-  <div class="modal connect-modal">
-    <button class="modal-close" onclick="document.getElementById('connect-modal').classList.remove('active')">✕</button>
+<!-- CONNECT WALLET -->
+<div class="overlay" id="connect-modal">
+  <div class="modal accent-border">
+    <button class="modal-close" onclick="closeModal('connect-modal')">✕</button>
     <h2>Connect Wallet</h2>
-    <p>Enter your crypto wallet address to save your balance and winnings across sessions.</p>
-    <div class="manual-wallet-wrap">
-      <label>YOUR WALLET ADDRESS</label>
-      <input type="text" id="connect-wallet-input" placeholder="0x... or TRC20 address" />
+    <p>Enter your crypto wallet address. Your balance and winnings are tied to this address.</p>
+    <div class="field">
+      <label>WALLET ADDRESS</label>
+      <input type="text" id="connect-input" placeholder="0x... or TRC20 address"/>
     </div>
-    <br/>
-    <button class="btn-confirm" id="confirm-connect-btn">CONNECT</button>
+    <button class="btn-full" id="btn-connect-confirm">CONNECT</button>
   </div>
 </div>
 
-<!-- DEPOSIT MODAL -->
-<div class="modal-overlay" id="deposit-modal">
-  <div class="modal deposit-modal">
-    <button class="modal-close" onclick="document.getElementById('deposit-modal').classList.remove('active')">✕</button>
-    <h2>Deposit Funds</h2>
-    <p>Add USDT to your balance and use it to reveal tiles anytime.</p>
-    <div class="deposit-amounts">
-      <button class="deposit-btn active" data-amount="5" onclick="selectDeposit(this,5)"><b>$5</b>5 tiles</button>
-      <button class="deposit-btn" data-amount="10" onclick="selectDeposit(this,10)"><b>$10</b>10 tiles</button>
-      <button class="deposit-btn" data-amount="20" onclick="selectDeposit(this,20)"><b>$20</b>20 tiles</button>
-      <button class="deposit-btn" data-amount="50" onclick="selectDeposit(this,50)"><b>$50</b>50 tiles</button>
-    </div>
-    <div class="balance-preview">
-      <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
-      <div><span>Depositing</span><span id="dep-amount-preview">$5.00</span></div>
-      <div><span>New balance</span><span id="dep-new-balance">$5.00</span></div>
-    </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
-      <div class="coin-select">
-        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
-        <button class="coin-btn" data-coin="btc">BTC</button>
-        <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn active" data-coin="trx">TRX</button>
-      </div>
-    </div>
-    <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
-  </div>
-</div>
-
-<!-- PRIVACY MODAL -->
-<div class="modal-overlay" id="privacy-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('privacy-modal').classList.remove('active')">✕</button>
-    <h2>Privacy Policy</h2>
-    <p>HiddenDrop does not collect personal information. The only data we store is your crypto wallet address (which you provide voluntarily) to send prizes. We do not share your data with third parties. Payments are processed by NOWPayments. Game state is stored on Supabase.</p>
-  </div>
-</div>
-
-<!-- SECURITY MODAL -->
-<div class="modal-overlay" id="security-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('security-modal').classList.remove('active')">✕</button>
-    <h2>Security</h2>
-    <p>All payments are processed through NOWPayments, a trusted crypto payment processor. We never store your private keys or payment details. Prize payouts are sent directly to the wallet address you provide. Tile state is recorded on Supabase with real-time verification.</p>
-  </div>
-</div>
-
-<!-- HOW IT WORKS MODAL -->
-<div class="modal-overlay" id="howto-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('howto-modal').classList.remove('active')">✕</button>
-    <h2>How it Works</h2>
-    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $3 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
-  </div>
-</div>
-
-<!-- COFFEE MODAL -->
-<div class="modal-overlay" id="coffee-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('coffee-modal').classList.remove('active')">✕</button>
-    <h2>☕ Buy Me a Coffee</h2>
-    <p>Enjoying HiddenDrop? Support the developer with a small crypto donation. Every coffee keeps the server running!</p>
-    <div class="coffee-amounts">
-      <button class="coffee-amount-btn active" data-amount="1" onclick="selectCoffee(this,'1')">
-        <span class="coffee-emoji">☕</span>$1
-      </button>
-      <button class="coffee-amount-btn" data-amount="3" onclick="selectCoffee(this,'3')">
-        <span class="coffee-emoji">☕☕</span>$3
-      </button>
-      <button class="coffee-amount-btn" data-amount="5" onclick="selectCoffee(this,'5')">
-        <span class="coffee-emoji">☕☕☕</span>$5
-      </button>
-      <button class="coffee-amount-btn" data-amount="10" onclick="selectCoffee(this,'10')">
-        <span class="coffee-emoji">🏆</span>$10
-      </button>
-    </div>
-    <div class="coffee-address-box">
-      <div class="coffee-network">USDT · TRC20 Network</div>
-      <div class="coffee-address" id="coffee-wallet-address">TCgzzpfsGqEovDxkDRXWQHu4HV9Xh2QhZN</div>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
-    </div>
-    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
-  </div>
-</div>
-
-
-
-
-
-</script>
-</body>
-</html<!-- DEPOSIT MODAL -->
-<div class="modal-overlay" id="deposit-modal">
-  <div class="modal deposit-modal">
-    <button class="modal-close" id="dep-close-btn">✕</button>
+<!-- DEPOSIT MODAL - 3 STEPS -->
+<div class="overlay" id="deposit-modal">
+  <div class="modal accent-border">
+    <button class="modal-close" onclick="closeModal('deposit-modal')">✕</button>
 
     <!-- STEP INDICATORS -->
-    <div class="dep-steps">
-      <div class="dep-step active" id="dep-indicator-1">1. Tiles</div>
-      <div class="dep-step-arrow">→</div>
-      <div class="dep-step" id="dep-indicator-2">2. Currency</div>
-      <div class="dep-step-arrow">→</div>
-      <div class="dep-step" id="dep-indicator-3">3. Pay</div>
+    <div class="steps-nav">
+      <div class="step-pill active" id="sp1">1. Tiles</div>
+      <div class="step-arrow">›</div>
+      <div class="step-pill" id="sp2">2. Currency</div>
+      <div class="step-arrow">›</div>
+      <div class="step-pill" id="sp3">3. Pay</div>
     </div>
 
-    <!-- STEP 1: Tiles -->
-    <div id="dep-step-1">
+    <!-- STEP 1 -->
+    <div id="ds1">
       <h2>How Many Tiles?</h2>
-      <p>Each tile costs $3. Minimum deposit is $15 (5 tiles).</p>
-      <div class="deposit-amounts" id="dep-tiles-btns">
-        <button class="deposit-btn active" data-tiles="5" onclick="selectTiles(this,5)"><b>5 tiles</b>$15</button>
-        <button class="deposit-btn" data-tiles="10" onclick="selectTiles(this,10)"><b>10 tiles</b>$30</button>
-        <button class="deposit-btn" data-tiles="20" onclick="selectTiles(this,20)"><b>20 tiles</b>$60</button>
-        <button class="deposit-btn" data-tiles="33" onclick="selectTiles(this,33)"><b>33 tiles</b>$99</button>
+      <p>Each tile costs $3. Select how many you want to reveal.</p>
+      <div class="tile-grid-sel">
+        <div class="tile-opt active" onclick="pickTiles(this,5)">
+          <span class="tile-count">5</span>
+          <span class="tile-price">$15</span>
+          <span class="tile-badge">MIN</span>
+        </div>
+        <div class="tile-opt" onclick="pickTiles(this,10)">
+          <span class="tile-count">10</span>
+          <span class="tile-price">$30</span>
+          <span class="tile-badge">&nbsp;</span>
+        </div>
+        <div class="tile-opt" onclick="pickTiles(this,20)">
+          <span class="tile-count">20</span>
+          <span class="tile-price">$60</span>
+          <span class="tile-badge">POPULAR</span>
+        </div>
+        <div class="tile-opt" onclick="pickTiles(this,33)">
+          <span class="tile-count">33</span>
+          <span class="tile-price">$99</span>
+          <span class="tile-badge">⚡ MAX</span>
+        </div>
       </div>
-      <div class="balance-preview">
-        <div><span>Tiles</span><span id="dep-tiles-label">5 tiles</span></div>
-        <div><span>Total</span><span id="dep-total-label">$15.00</span></div>
-        <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
-        <div><span>New balance</span><span id="dep-new-balance">$15.00</span></div>
+      <div class="info-table">
+        <div><span>Tiles selected</span><span id="d-tiles">5 tiles</span></div>
+        <div><span>Total amount</span><span class="accent" id="d-total">$15.00</span></div>
+        <div><span>Current balance</span><span id="d-current">$0.00</span></div>
+        <div><span>Balance after</span><span class="green" id="d-after">$15.00</span></div>
       </div>
-      <button class="btn-confirm" onclick="depGoStep(2)">NEXT →</button>
+      <button class="btn-full" onclick="dsGo(2)">NEXT →</button>
     </div>
 
-    <!-- STEP 2: Currency -->
-    <div id="dep-step-2" style="display:none;">
+    <!-- STEP 2 -->
+    <div id="ds2" style="display:none">
       <h2>Pay With</h2>
-      <p>Choose your cryptocurrency.</p>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
-        <button class="coin-btn-large active" id="dep-coin-usdttrc20" onclick="selectDepCoin('usdttrc20')">
-          <span>💵</span><div><b>USDT TRC20</b><small>Stable — 1 USDT = $1</small></div><span class="ccheck">✓</span>
-        </button>
-        <button class="coin-btn-large" id="dep-coin-btc" onclick="selectDepCoin('btc')">
-          <span>₿</span><div><b>Bitcoin</b><small>BTC</small></div><span class="ccheck" style="opacity:0">✓</span>
-        </button>
-        <button class="coin-btn-large" id="dep-coin-eth" onclick="selectDepCoin('eth')">
-          <span>⟠</span><div><b>Ethereum</b><small>ETH</small></div><span class="ccheck" style="opacity:0">✓</span>
-        </button>
-        <button class="coin-btn-large" id="dep-coin-trx" onclick="selectDepCoin('trx')">
-          <span>⚡</span><div><b>TRON</b><small>TRX — fast & cheap</small></div><span class="ccheck" style="opacity:0">✓</span>
-        </button>
+      <p>Choose your cryptocurrency. USDT is recommended for stable value.</p>
+      <div class="coin-opts">
+        <div class="coin-opt active" onclick="pickCoin(this,'usdttrc20')">
+          <span class="coin-icon">💵</span>
+          <div class="coin-info">
+            <span class="coin-name">USDT TRC20</span>
+            <span class="coin-sub">Tether — always $1.00</span>
+          </div>
+          <span class="coin-check">✓</span>
+        </div>
+        <div class="coin-opt" onclick="pickCoin(this,'btc')">
+          <span class="coin-icon">₿</span>
+          <div class="coin-info">
+            <span class="coin-name">Bitcoin</span>
+            <span class="coin-sub">BTC — market price</span>
+          </div>
+          <span class="coin-check">✓</span>
+        </div>
+        <div class="coin-opt" onclick="pickCoin(this,'eth')">
+          <span class="coin-icon">⟠</span>
+          <div class="coin-info">
+            <span class="coin-name">Ethereum</span>
+            <span class="coin-sub">ETH — market price</span>
+          </div>
+          <span class="coin-check">✓</span>
+        </div>
+        <div class="coin-opt" onclick="pickCoin(this,'trx')">
+          <span class="coin-icon">⚡</span>
+          <div class="coin-info">
+            <span class="coin-name">TRON</span>
+            <span class="coin-sub">TRX — fast & cheap</span>
+          </div>
+          <span class="coin-check">✓</span>
+        </div>
       </div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn-confirm" style="background:var(--border);color:var(--muted);flex:1;" onclick="depGoStep(1)">← BACK</button>
-        <button class="btn-confirm" style="flex:2;" onclick="depGoStep(3)">NEXT →</button>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="dsGo(1)">← BACK</button>
+        <button class="btn-full" onclick="dsGo(3)">NEXT →</button>
       </div>
     </div>
 
-    <!-- STEP 3: Pay -->
-    <div id="dep-step-3" style="display:none;">
-      <h2>Complete Payment</h2>
-      <p>Confirm your details and pay.</p>
-      <div class="balance-preview" style="margin-bottom:16px;">
-        <div><span>Amount</span><span id="dep-final-amount">$15.00</span></div>
-        <div><span>Currency</span><span id="dep-final-coin">USDT TRC20</span></div>
-        <div><span>Tiles</span><span id="dep-final-tiles">5 tiles</span></div>
-        <div><span>Win chance</span><span id="dep-final-chance">5%</span></div>
+    <!-- STEP 3 -->
+    <div id="ds3" style="display:none">
+      <h2>Confirm & Pay</h2>
+      <p>Enter your wallet address to receive winnings, then complete payment.</p>
+      <div class="info-table" style="margin-bottom:14px">
+        <div><span>Paying</span><span class="accent" id="d-final-amt">$15.00</span></div>
+        <div><span>Currency</span><span id="d-final-coin">USDT TRC20</span></div>
+        <div><span>Tiles you'll get</span><span id="d-final-tiles">5 tiles</span></div>
+        <div><span>Win chance</span><span class="green" id="d-final-chance">5.0%</span></div>
       </div>
-      <div class="wallet-input-wrap" style="margin-bottom:16px;">
+      <div class="field">
         <label>YOUR WALLET (to receive winnings)</label>
-        <input type="text" id="dep-wallet-input" placeholder="Your crypto wallet address" />
+        <input type="text" id="dep-wallet" placeholder="Your crypto wallet address"/>
       </div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn-confirm" style="background:var(--border);color:var(--muted);flex:1;" onclick="depGoStep(2)">← BACK</button>
-        <button class="btn-confirm" style="flex:2;" id="confirm-deposit-btn">PAY NOW 🚀</button>
+      <div class="btn-row">
+        <button class="btn-ghost" onclick="dsGo(2)">← BACK</button>
+        <button class="btn-full" id="btn-pay-now">PAY NOW 🚀</button>
       </div>
     </div>
 
   </div>
 </div>
 
-<!-- BUY MODAL -->
-<div class="modal-overlay" id="buy-modal">
-  <div class="modal">
-    <button class="modal-close" id="modal-close">✕</button>
-    <h2>Reveal a Tile</h2>
-    <p>Pay $3 USDT to reveal a random tile. The image stays blurred until ALL tiles are revealed. Last tile wins the prize!</p>
-    <div class="tile-info">
-      <div><span>Price</span><span>$3.00 USDT</span></div>
-      <div><span>Tiles remaining</span><span id="modal-remaining">100</span></div>
-      <div><span>Win chance</span><span id="modal-chance">1%</span></div>
-      <div><span>Prize pool</span><span id="modal-prize">$0.00</span></div>
-    </div>
-    <div class="wallet-input-wrap">
-      <label>YOUR WALLET (to receive prize if you win)</label>
-      <input type="text" id="wallet-input" placeholder="Your crypto wallet address" />
-    </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
-      <div class="coin-select">
-        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
-        <button class="coin-btn" data-coin="btc">BTC</button>
-        <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn active" data-coin="trx">TRX</button>
-      </div>
-    </div>
-    <div id="free-tile-notice" style="display:none;background:linear-gradient(135deg,#0d2000,#1a3300);border:1px solid #4dff88;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:0.75rem;color:#4dff88;text-align:center;">
-  🎁 You have <b id="free-tiles-available">0</b> free tile(s)! Use one instead of paying?
-  <br/><button onclick="useFreeeTile()" style="margin-top:8px;background:#4dff88;color:#000;border:none;border-radius:4px;padding:6px 16px;font-family:'Space Mono',monospace;font-size:0.7rem;cursor:pointer;font-weight:700;">USE FREE TILE</button>
-</div>
-<button class="btn-confirm" id="confirm-pay">PAY $3 & REVEAL</button>
-  </div>
-</div>
-
-<!-- PAYMENT MODAL -->
-<div class="modal-overlay" id="payment-modal">
-  <div class="modal">
-    <button class="modal-close" id="payment-close">✕</button>
+<!-- PAYMENT WAITING -->
+<div class="overlay" id="payment-modal">
+  <div class="modal accent-border">
+    <button class="modal-close" onclick="closeModal('payment-modal')">✕</button>
     <h2>Complete Payment</h2>
-    <p>Send exactly the amount below. Your tile reveals automatically after confirmation.</p>
-    <div class="tile-info">
-      <div><span>Amount</span><span id="pay-amount">—</span></div>
-      <div><span>Network</span><span id="pay-network">—</span></div>
-      <div><span>Status</span><span id="pay-status"><span class="status-badge status-waiting">Waiting...</span></span></div>
+    <p>Send the exact amount to the address below. Your tiles will be revealed automatically after confirmation.</p>
+    <div class="info-table">
+      <div><span>Amount</span><span class="accent" id="pm-amount">—</span></div>
+      <div><span>Network</span><span id="pm-network">—</span></div>
+      <div><span>Status</span><span id="pm-status"><span class="status-badge status-wait">Waiting...</span></span></div>
     </div>
-    <div class="payment-address-box">
-      <div class="address" id="pay-address">Generating...</div>
-      <button class="copy-btn" id="copy-address-btn">Copy Address</button>
+    <div class="pay-addr-box">
+      <div class="pay-addr" id="pm-address">Generating address...</div>
+      <button class="pay-copy" id="pm-copy">Copy Address</button>
     </div>
-    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Waiting for blockchain confirmation (1-5 min)</p>
+    <p style="text-align:center;font-size:.72rem;color:var(--muted)">Blockchain confirmation usually takes 1–5 minutes.</p>
   </div>
 </div>
 
-<!-- CONNECT WALLET MODAL -->
-<div class="modal-overlay" id="connect-modal">
-  <div class="modal connect-modal">
-    <button class="modal-close" onclick="document.getElementById('connect-modal').classList.remove('active')">✕</button>
-    <h2>Connect Wallet</h2>
-    <p>Enter your crypto wallet address to save your balance and winnings across sessions.</p>
-    <div class="manual-wallet-wrap">
-      <label>YOUR WALLET ADDRESS</label>
-      <input type="text" id="connect-wallet-input" placeholder="0x... or TRC20 address" />
-    </div>
-    <br/>
-    <button class="btn-confirm" id="confirm-connect-btn">CONNECT</button>
-  </div>
-</div>
-
-<!-- DEPOSIT MODAL -->
-<div class="modal-overlay" id="deposit-modal">
-  <div class="modal deposit-modal">
-    <button class="modal-close" onclick="document.getElementById('deposit-modal').classList.remove('active')">✕</button>
-    <h2>Deposit Funds</h2>
-    <p>Add USDT to your balance and use it to reveal tiles anytime.</p>
-    <div class="deposit-amounts">
-      <button class="deposit-btn active" data-amount="5" onclick="selectDeposit(this,5)"><b>$5</b>5 tiles</button>
-      <button class="deposit-btn" data-amount="10" onclick="selectDeposit(this,10)"><b>$10</b>10 tiles</button>
-      <button class="deposit-btn" data-amount="20" onclick="selectDeposit(this,20)"><b>$20</b>20 tiles</button>
-      <button class="deposit-btn" data-amount="50" onclick="selectDeposit(this,50)"><b>$50</b>50 tiles</button>
-    </div>
-    <div class="balance-preview">
-      <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
-      <div><span>Depositing</span><span id="dep-amount-preview">$5.00</span></div>
-      <div><span>New balance</span><span id="dep-new-balance">$5.00</span></div>
-    </div>
-    <div style="margin-bottom:16px;">
-      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
-      <div class="coin-select">
-        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
-        <button class="coin-btn" data-coin="btc">BTC</button>
-        <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn active" data-coin="trx">TRX</button>
-      </div>
-    </div>
-    <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
-  </div>
-</div>
-
-<!-- PRIVACY MODAL -->
-<div class="modal-overlay" id="privacy-modal">
+<!-- HOW IT WORKS -->
+<div class="overlay" id="how-modal">
   <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('privacy-modal').classList.remove('active')">✕</button>
+    <button class="modal-close" onclick="closeModal('how-modal')">✕</button>
+    <h2>How It Works</h2>
+    <p>1. <strong style="color:var(--accent)">Choose a category</strong> and select a mystery image from the thumbnails above.<br/><br/>2. <strong style="color:var(--accent)">Deposit funds</strong> — minimum $15 (5 tiles at $3 each). Your balance is saved to your wallet address.<br/><br/>3. <strong style="color:var(--accent)">Reveal tiles</strong> from your balance. The image stays fully blurred the entire time — no peeking!<br/><br/>4. <strong style="color:var(--accent)">Last tile wins!</strong> The player who reveals the final tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>5. <strong style="color:var(--accent)">Share your referral link</strong> — earn a free tile every time a friend makes their first deposit!</p>
+  </div>
+</div>
+
+<!-- PRIVACY -->
+<div class="overlay" id="privacy-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('privacy-modal')">✕</button>
     <h2>Privacy Policy</h2>
-    <p>HiddenDrop does not collect personal information. The only data we store is your crypto wallet address (which you provide voluntarily) to send prizes. We do not share your data with third parties. Payments are processed by NOWPayments. Game state is stored on Supabase.</p>
+    <p>HiddenDrop does not collect personal information. The only data stored is your crypto wallet address (provided voluntarily) to track your balance and send winnings. We do not share your data with third parties. Payments are processed by NOWPayments. Game state is stored securely on Supabase.</p>
   </div>
 </div>
 
-<!-- SECURITY MODAL -->
-<div class="modal-overlay" id="security-modal">
+<!-- SECURITY -->
+<div class="overlay" id="security-modal">
   <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('security-modal').classList.remove('active')">✕</button>
+    <button class="modal-close" onclick="closeModal('security-modal')">✕</button>
     <h2>Security</h2>
-    <p>All payments are processed through NOWPayments, a trusted crypto payment processor. We never store your private keys or payment details. Prize payouts are sent directly to the wallet address you provide. Tile state is recorded on Supabase with real-time verification.</p>
+    <p>All payments are processed through NOWPayments, a trusted non-custodial crypto payment processor. We never store your private keys. Prize payouts go directly to the wallet address you provide. Your balance is stored on Supabase with real-time verification. Each payment generates a unique address — we never reuse addresses.</p>
   </div>
 </div>
 
-<!-- HOW IT WORKS MODAL -->
-<div class="modal-overlay" id="howto-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('howto-modal').classList.remove('active')">✕</button>
-    <h2>How it Works</h2>
-    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $3 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
-  </div>
-</div>
-
-<!-- COFFEE MODAL -->
-<div class="modal-overlay" id="coffee-modal">
-  <div class="modal">
-    <button class="modal-close" onclick="document.getElementById('coffee-modal').classList.remove('active')">✕</button>
+<!-- COFFEE -->
+<div class="overlay" id="coffee-modal">
+  <div class="modal accent-border">
+    <button class="modal-close" onclick="closeModal('coffee-modal')">✕</button>
     <h2>☕ Buy Me a Coffee</h2>
-    <p>Enjoying HiddenDrop? Support the developer with a small crypto donation. Every coffee keeps the server running!</p>
-    <div class="coffee-amounts">
-      <button class="coffee-amount-btn active" data-amount="1" onclick="selectCoffee(this,'1')">
-        <span class="coffee-emoji">☕</span>$1
-      </button>
-      <button class="coffee-amount-btn" data-amount="3" onclick="selectCoffee(this,'3')">
-        <span class="coffee-emoji">☕☕</span>$3
-      </button>
-      <button class="coffee-amount-btn" data-amount="5" onclick="selectCoffee(this,'5')">
-        <span class="coffee-emoji">☕☕☕</span>$5
-      </button>
-      <button class="coffee-amount-btn" data-amount="10" onclick="selectCoffee(this,'10')">
-        <span class="coffee-emoji">🏆</span>$10
-      </button>
+    <p>Enjoying HiddenDrop? Support the developer with a small crypto donation. Every coffee keeps the servers running!</p>
+    <div class="info-table" style="margin-bottom:14px">
+      <div><span>Network</span><span>USDT TRC20</span></div>
+      <div><span>Address</span><span style="font-size:.58rem;color:var(--accent)" id="coffee-addr">TCgzzpfsGqEovDxkDRXWQHu4HV9Xh2QhZN</span></div>
     </div>
-    <div class="coffee-address-box">
-      <div class="coffee-network">USDT · TRC20 Network</div>
-      <div class="coffee-address" id="coffee-wallet-address">TCgzzpfsGqEovDxkDRXWQHu4HV9Xh2QhZN</div>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
+    <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <button onclick="selectCoffee(this,'$1')" class="tile-opt active" style="flex:1;min-width:60px"><span class="tile-count">☕</span><span class="tile-price">$1</span></button>
+      <button onclick="selectCoffee(this,'$3')" class="tile-opt" style="flex:1;min-width:60px"><span class="tile-count">☕☕</span><span class="tile-price">$3</span></button>
+      <button onclick="selectCoffee(this,'$5')" class="tile-opt" style="flex:1;min-width:60px"><span class="tile-count">☕☕☕</span><span class="tile-price">$5</span></button>
+      <button onclick="selectCoffee(this,'$10')" class="tile-opt" style="flex:1;min-width:60px"><span class="tile-count">🏆</span><span class="tile-price">$10</span></button>
     </div>
-    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
+    <button class="pay-copy" onclick="navigator.clipboard.writeText(document.getElementById('coffee-addr').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)" style="width:100%;padding:10px">Copy Address</button>
+    <p style="text-align:center;font-size:.72rem;color:var(--muted);margin-top:12px">Send any amount of USDT TRC20. Thank you! 🙏</p>
   </div>
 </div>
 
-
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// CONFIG — replace with your real keys
+// ════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5lYWdia3JtaHllY25wb25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDYxNDUsImV4cCI6MjA5NTkyMjE0NX0.m_Sl1-8pmg_RJRJlk6vlv5bZb3aMdFs-rx6Rd0y4n_c'
 const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
-const API_URL = 'https://hiddendrop-api.onrender.com'
+const API_URL       = 'https://hidden-drop.onrender.com'
 
-// ─── INIT ─────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════════════
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
 
-const TOTAL_TILES = 100
-const TILE_PRICE = 3.00
-const PRIZE_PERCENT = 0.20
+const TOTAL   = 100
+const PRICE   = 3.00
+const PRIZE_P = 0.20
 
-let revealedTiles = new Set()
-let selectedCoin = 'trx'
-let currentImageUrl = ''
-let currentImageId = null
-let currentCategory = 'stadiums'
-let categoryImages = {}
-let pollInterval = null
+let revealed   = new Set()
+let myWallet   = ''
+let myBalance  = 0
+let myRefCode  = ''
+let freeTiles  = 0
+let curImgUrl  = ''
+let curImgId   = ''
+let curCat     = 'stadiums'
+let catCache   = {}
+let depTiles   = 5
+let depCoin    = 'usdttrc20'
+let pollTimer  = null
 
-// Category config
-const CATEGORIES = {
-  stadiums:  { name: 'STADIUM',  query: 'football stadium aerial view' },
-  supercars: { name: 'SUPERCAR', query: 'exotic supercar sports car' },
-  cities:    { name: 'CITY',     query: 'city skyline aerial night' },
-  nature:    { name: 'NATURE',   query: 'nature landscape mountains' },
-  random:    { name: 'MYSTERY',  query: 'abstract colorful art pattern' }
-}
+// ════════════════════════════════════════════════════════════════
+// MODAL HELPERS
+// ════════════════════════════════════════════════════════════════
+function openModal(id)  { document.getElementById(id).classList.add('open') }
+function closeModal(id) { document.getElementById(id).classList.remove('open') }
 
-// ─── FETCH IMAGES FROM UNSPLASH ───────────────────────────────────
-async function fetchImages(query, category) {
-  if(categoryImages[category]) return categoryImages[category]
-  try {
-    const res = await fetch(
-      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&count=10&orientation=squarish`,
-      { headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` } }
-    )
-    const data = await res.json()
-    if(!Array.isArray(data)) return []
-    const images = data.map((img, i) => ({
-      id: img.id,
-      thumb: img.urls.thumb,
-      full: img.urls.regular,
-      name: img.alt_description || `Image ${i+1}`
-    }))
-    categoryImages[category] = images
-    return images
-  } catch(e) {
-    console.error('Unsplash error:', e)
-    return []
-  }
-}
-
-// ─── RENDER IMAGE SELECTOR ────────────────────────────────────────
-async function renderImageSelector(category) {
-  const selector = document.getElementById('image-selector')
-  selector.innerHTML = ''
-
-  // Show loading placeholders
-  for(let i = 0; i < 10; i++) {
-    const ph = document.createElement('div')
-    ph.className = 'img-loading'
-    ph.innerHTML = '<div class="img-loading-dot"></div>'
-    selector.appendChild(ph)
-  }
-
-  const query = CATEGORIES[category].query
-  const images = await fetchImages(query, category)
-
-  selector.innerHTML = ''
-  images.forEach((img, i) => {
-    const thumb = document.createElement('div')
-    thumb.className = 'img-thumb'
-    thumb.dataset.index = i
-    thumb.innerHTML = `
-      <img src="${img.thumb}" alt="${img.name}" loading="lazy" />
-      <span class="thumb-num">#${i+1}</span>
-    `
-    thumb.addEventListener('click', () => selectImage(img, i, category))
-    selector.appendChild(thumb)
-  })
-
-  // Auto-select first image
-  if(images.length > 0) selectImage(images[0], 0, category)
-}
-
-// ─── SELECT IMAGE ─────────────────────────────────────────────────
-async function selectImage(img, index, category) {
-  currentImageUrl = img.full
-  currentImageId = `${category}_${img.id}`
-
-  // Update thumbnail active state
-  document.querySelectorAll('.img-thumb').forEach((t, i) => {
-    t.classList.toggle('active', i === index)
-  })
-
-  // Update puzzle image - keep blurred
-  const puzzleImg = document.getElementById('puzzle-image')
-  puzzleImg.src = img.full
-  puzzleImg.classList.remove('fully-revealed')
-  puzzleImg.style.filter = 'blur(20px)'
-  puzzleImg.style.transform = 'scale(1.1)'
-
-  document.getElementById('current-img-name').textContent = `#${index+1}`
-  document.getElementById('puzzle-label-text').textContent = `100 tiles — $1 each`
-
-  // Load tile state for this image
-  await loadTileState(currentImageId)
-  buildGrid()
-  updateStats()
-}
-
-// ─── LOAD TILE STATE ──────────────────────────────────────────────
-async function loadTileState(imageId) {
-  try {
-    const { data } = await db.from('tiles').select('id').eq('revealed', true).eq('image_id', imageId)
-    revealedTiles = new Set((data || []).map(r => r.id))
-  } catch(e) {
-    revealedTiles = new Set()
-  }
-}
-
-// ─── BUILD GRID ───────────────────────────────────────────────────
-function buildGrid() {
-  const grid = document.getElementById('tile-grid')
-  grid.innerHTML = ''
-  for(let i = 0; i < TOTAL_TILES; i++) {
-    const tile = document.createElement('div')
-    tile.className = 'tile'
-    tile.dataset.index = i
-    if(revealedTiles.has(i)) tile.classList.add('revealed')
-    tile.addEventListener('click', () => {
-      if(!tile.classList.contains('revealed')) openBuyModal()
-    })
-    grid.appendChild(tile)
-  }
-  highlightLastTile()
-  checkFullyRevealed()
-}
-
-function highlightLastTile() {
-  const remaining = TOTAL_TILES - revealedTiles.size
-  if(remaining === 1) {
-    document.querySelectorAll('.tile:not(.revealed)').forEach(t => t.classList.add('last-tile'))
-  }
-}
-
-function checkFullyRevealed() {
-  if(revealedTiles.size === TOTAL_TILES) {
-    const img = document.getElementById('puzzle-image')
-    img.classList.add('fully-revealed')
-    img.style.filter = 'blur(0px)'
-    img.style.transform = 'scale(1)'
-  }
-}
-
-// ─── UPDATE STATS ─────────────────────────────────────────────────
-function updateStats() {
-  const revealed = revealedTiles.size
-  const remaining = TOTAL_TILES - revealed
-  const prize = (revealed * TILE_PRICE * PRIZE_PERCENT).toFixed(2)
-  const pct = (revealed / TOTAL_TILES * 100).toFixed(0)
-  document.getElementById('stat-revealed').textContent = revealed
-  document.getElementById('stat-remaining').textContent = remaining
-  document.getElementById('stat-prize').textContent = `$${prize}`
-  document.getElementById('hero-prize').textContent = `$${prize}`
-  document.getElementById('prize-amount').textContent = `$${prize}`
-  document.getElementById('revealed-num').textContent = revealed
-  document.getElementById('remaining-num').textContent = `${remaining} left`
-  document.getElementById('progress-fill').style.width = `${pct}%`
-  document.getElementById('modal-remaining').textContent = remaining
-  document.getElementById('modal-chance').textContent = `${(1/Math.max(remaining,1)*100).toFixed(2)}%`
-  document.getElementById('modal-prize').textContent = `$${prize}`
-}
-
-// ─── CATEGORY BUTTONS ─────────────────────────────────────────────
-document.querySelectorAll('.cat-btn').forEach(btn => {
-  btn.addEventListener('click', async () => {
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'))
-    btn.classList.add('active')
-    currentCategory = btn.dataset.cat
-    document.getElementById('current-cat-name').textContent = CATEGORIES[currentCategory].name
-    document.getElementById('loading-text').textContent = `Loading ${currentCategory}...`
-    document.getElementById('loading-overlay').classList.remove('hidden')
-    await renderImageSelector(currentCategory)
-    document.getElementById('loading-overlay').classList.add('hidden')
-  })
+// Close on overlay click
+document.querySelectorAll('.overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target === o) o.classList.remove('open') })
 })
 
-// ─── MODALS ───────────────────────────────────────────────────────
-function openBuyModal() {
-  if(!currentImageUrl) { alert('Please select an image first!'); return }
-  updateStats()
-  document.getElementById('buy-modal').classList.add('active')
-}
-
-document.getElementById('buy-btn').addEventListener('click', openBuyModal)
-document.getElementById('modal-close').addEventListener('click', () => document.getElementById('buy-modal').classList.remove('active'))
-document.getElementById('payment-close').addEventListener('click', () => {
-  document.getElementById('payment-modal').classList.remove('active')
-  if(pollInterval) clearInterval(pollInterval)
-})
-
-document.querySelectorAll('.coin-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.coin-btn').forEach(b => b.classList.remove('active'))
-    btn.classList.add('active')
-    selectedCoin = btn.dataset.coin
-  })
-})
-
-// ─── CREATE PAYMENT ───────────────────────────────────────────────
-document.getElementById('confirm-pay').addEventListener('click', async () => {
-  const wallet = document.getElementById('wallet-input').value.trim()
-  if(!wallet) { document.getElementById('wallet-input').style.borderColor = 'var(--accent2)'; return }
-  document.getElementById('wallet-input').style.borderColor = ''
-
-  const btn = document.getElementById('confirm-pay')
-  btn.disabled = true
-  btn.textContent = 'Creating payment...'
-
-  try {
-    const unrevealed = []
-    for(let i = 0; i < TOTAL_TILES; i++) {
-      if(!revealedTiles.has(i)) unrevealed.push(i)
-    }
-    if(unrevealed.length === 0) { alert('All tiles revealed!'); return }
-    const tileId = unrevealed[Math.floor(Math.random() * unrevealed.length)]
-
-    const response = await fetch(`${API_URL}/api/create-payment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pay_currency: selectedCoin,
-        tile_id: tileId,
-        image_id: currentImageId,
-        wallet: wallet
-      })
-    })
-    const payment = await response.json()
-    if(!payment.pay_address) throw new Error(payment.error || 'Failed')
-
-    // Save to Supabase
-    await db.from('tiles').update({ payment_id: payment.payment_id, wallet }).eq('id', tileId).eq('image_id', currentImageId)
-
-    // Show payment modal
-    document.getElementById('buy-modal').classList.remove('active')
-    document.getElementById('pay-amount').textContent = `${payment.pay_amount} ${selectedCoin.toUpperCase()}`
-    document.getElementById('pay-network').textContent = selectedCoin.toUpperCase()
-    document.getElementById('pay-address').textContent = payment.pay_address
-    document.getElementById('payment-modal').classList.add('active')
-
-    document.getElementById('copy-address-btn').onclick = () => {
-      navigator.clipboard.writeText(payment.pay_address)
-      document.getElementById('copy-address-btn').textContent = 'Copied! ✓'
-      setTimeout(() => document.getElementById('copy-address-btn').textContent = 'Copy Address', 2000)
-    }
-
-    pollPaymentStatus(payment.payment_id, tileId, wallet)
-  } catch(e) {
-    console.error(e)
-    alert('Error: ' + e.message)
-  }
-
-  btn.disabled = false
-  btn.textContent = 'PAY & REVEAL'
-})
-
-// ─── POLL PAYMENT ─────────────────────────────────────────────────
-function pollPaymentStatus(paymentId, tileId, wallet) {
-  if(pollInterval) clearInterval(pollInterval)
-  pollInterval = setInterval(async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/check-payment?id=${paymentId}`)
-      const data = await res.json()
-      const statusEl = document.getElementById('pay-status')
-
-      if(data.payment_status === 'finished' || data.payment_status === 'confirmed') {
-        clearInterval(pollInterval)
-        statusEl.innerHTML = '<span class="status-badge status-confirmed">✓ Confirmed!</span>'
-
-        await db.from('tiles').update({
-          revealed: true, wallet, payment_id: paymentId, revealed_at: new Date().toISOString()
-        }).eq('id', tileId).eq('image_id', currentImageId)
-
-        revealTileUI(tileId, wallet)
-        creditReferrer()
-        setTimeout(() => document.getElementById('payment-modal').classList.remove('active'), 2000)
-
-      } else if(data.payment_status === 'failed' || data.payment_status === 'expired') {
-        clearInterval(pollInterval)
-        statusEl.innerHTML = '<span class="status-badge status-error">Failed / Expired</span>'
-      } else {
-        statusEl.innerHTML = `<span class="status-badge status-waiting">${data.payment_status}...</span>`
-      }
-    } catch(e) { console.error(e) }
-  }, 10000)
-}
-
-// ─── REVEAL TILE UI ───────────────────────────────────────────────
-function revealTileUI(index, wallet) {
-  revealedTiles.add(index)
-  const tile = document.querySelector(`[data-index="${index}"]`)
-  if(tile) {
-    tile.style.transition = 'all 0.6s ease'
-    tile.style.transform = 'scale(1.1)'
-    tile.style.boxShadow = '0 0 30px rgba(240,224,64,0.6)'
-    setTimeout(() => {
-      tile.classList.add('revealed')
-      tile.style.transform = ''
-      tile.style.boxShadow = ''
-    }, 300)
-  }
-  addActivity(wallet, index)
-  updateStats()
-  highlightLastTile()
-  if(revealedTiles.size === TOTAL_TILES) {
-    checkFullyRevealed()
-    setTimeout(showWinner, 800)
-  }
-}
-
-// ─── REALTIME ─────────────────────────────────────────────────────
-function subscribeRealtime() {
-  db.channel('tiles-changes')
-    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tiles' }, payload => {
-      if(payload.new.revealed && payload.new.image_id === currentImageId) {
-        revealTileUI(payload.new.id, payload.new.wallet || 'anonymous')
-      }
-    }).subscribe()
-}
-
-// ─── ACTIVITY ─────────────────────────────────────────────────────
-function addActivity(wallet, tileIndex) {
-  const list = document.getElementById('activity-list')
-  const noActivity = list.querySelector('div[style]')
-  if(noActivity) list.innerHTML = ''
-  const short = wallet ? wallet.slice(0,6)+'...'+wallet.slice(-4) : 'anonymous'
-  const item = document.createElement('div')
-  item.className = 'activity-item'
-  item.innerHTML = `
-    <div class="activity-dot"></div>
-    <div class="activity-text"><b>${short}</b> revealed tile #${tileIndex}</div>
-    <div class="activity-time">now</div>
-  `
-  list.insertBefore(item, list.firstChild)
-  if(list.children.length > 10) list.removeChild(list.lastChild)
-}
-
-// ─── WINNER ───────────────────────────────────────────────────────
-function showWinner() {
-  spawnConfetti()
-  setTimeout(() => alert('🏆 ALL TILES REVEALED! The image is now visible! The last revealer wins the prize!'), 500)
-}
-
-function spawnConfetti() {
-  for(let i = 0; i < 80; i++) {
-    const c = document.createElement('div')
-    c.className = 'confetti-piece'
-    c.style.left = Math.random() * 100 + 'vw'
-    c.style.top = '-20px'
-    c.style.background = ['#f0e040','#ff4d4d','#4dff88','#4d88ff'][Math.floor(Math.random()*4)]
-    c.style.animationDelay = Math.random() * 2 + 's'
-    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '0'
-    document.body.appendChild(c)
-    setTimeout(() => c.remove(), 3500)
-  }
-}
-
-
-
-// ─── WALLET SYSTEM ────────────────────────────────────────────────
-let myWallet = ''
-let myBalance = 0
-let depositAmount = 5
-let depositPollInterval = null
-
-function initWallet() {
-  const stored = localStorage.getItem('hd_wallet')
-  if(stored) connectWalletAddress(stored)
-}
-
-async function connectWalletAddress(address) {
-  myWallet = address
-  localStorage.setItem('hd_wallet', address)
-
-  try {
-    // Load or create user in Supabase
-    const { data, error } = await db.from('users').select('*').eq('wallet', address).single()
-    if(error || !data) {
-      await db.from('users').insert({ wallet: address, balance: 0 })
-      myBalance = 0
-    } else {
-      myBalance = parseFloat(data.balance) || 0
-    }
-  } catch(e) {
-    console.error('Connect wallet error:', e)
-    myBalance = 0
-  }
-
-  updateWalletUI()
-  document.getElementById('connect-modal').classList.remove('active')
-
-  // Also set wallet input in buy modal
-  document.getElementById('wallet-input').value = address
-}
-
-function updateWalletUI() {
-  const short = myWallet.slice(0,6) + '...' + myWallet.slice(-4)
-  document.getElementById('wallet-short').textContent = short
-  document.getElementById('wallet-balance-display').innerHTML = `$${myBalance.toFixed(2)} <span>USDT</span>`
-  document.getElementById('wallet-info-connected').style.display = 'flex'
-  document.getElementById('wallet-info-disconnected').style.display = 'none'
-  document.getElementById('connect-wallet-btn').style.display = 'none'
-  document.getElementById('deposit-btn').style.display = 'block'
-
-  // Update deposit modal balance preview
-  document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
-  document.getElementById('dep-new-balance').textContent = `$${(myBalance + depositAmount).toFixed(2)}`
-
-  // Update buy button
-  const buyBtn = document.getElementById('buy-btn')
-  if(myBalance >= 3) {
-    buyBtn.textContent = 'REVEAL A TILE ($2)'
-    buyBtn.disabled = false
-  } else {
-    buyBtn.textContent = 'DEPOSIT TO PLAY'
-    buyBtn.disabled = false
-  }
-}
-
-function selectDeposit(btn, amount) {
-  document.querySelectorAll('.deposit-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
-  depositAmount = amount
-  document.getElementById('dep-amount-preview').textContent = `$${amount}.00`
-  document.getElementById('dep-new-balance').textContent = `$${(myBalance + amount).toFixed(2)}`
-}
-
-// Connect wallet button
-document.getElementById('connect-wallet-btn').addEventListener('click', () => {
-  document.getElementById('connect-modal').classList.add('active')
-})
-
-document.getElementById('confirm-connect-btn').addEventListener('click', () => {
-  const addr = document.getElementById('connect-wallet-input').value.trim()
-  if(!addr) { document.getElementById('connect-wallet-input').style.borderColor = 'var(--accent2)'; return }
-  connectWalletAddress(addr)
-})
-
-// Deposit button
-document.getElementById('deposit-btn').addEventListener('click', () => {
-  document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
-  document.getElementById('dep-new-balance').textContent = `$${(myBalance + depositAmount).toFixed(2)}`
-  document.getElementById('deposit-modal').classList.add('active')
-})
-
-document.getElementById('confirm-deposit-btn').addEventListener('click', async () => {
-  const walletInput = document.getElementById('dep-wallet-input').value.trim()
-  if(!walletInput) { document.getElementById('dep-wallet-input').style.borderColor = 'var(--accent2)'; return }
-
-  // Connect wallet if not connected
-  if(!myWallet) await connectWalletAddress(walletInput)
-
-  const btn = document.getElementById('confirm-deposit-btn')
-  btn.disabled = true
-  btn.textContent = 'Creating payment...'
-
-  const totalAmount = depTiles * 3
-
-  try {
-    const response = await fetch(`${API_URL}/api/create-payment`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        pay_currency: depCoin,
-        amount: totalAmount,
-        wallet: walletInput,
-        type: 'deposit'
-      })
-    })
-    const payment = await response.json()
-    if(!payment.pay_address) throw new Error(payment.error || 'Failed')
-
-    // Close deposit modal, show payment modal
-    document.getElementById('deposit-modal').classList.remove('active')
-    document.getElementById('pay-amount').textContent = `${payment.pay_amount} ${selectedCoin.toUpperCase()}`
-    document.getElementById('pay-network').textContent = selectedCoin.toUpperCase()
-    document.getElementById('pay-address').textContent = payment.pay_address
-    document.getElementById('pay-status').innerHTML = '<span class="status-badge status-waiting">Waiting...</span>'
-    document.getElementById('payment-modal').classList.add('active')
-
-    document.getElementById('copy-address-btn').onclick = () => {
-      navigator.clipboard.writeText(payment.pay_address)
-      document.getElementById('copy-address-btn').textContent = 'Copied! ✓'
-      setTimeout(() => document.getElementById('copy-address-btn').textContent = 'Copy Address', 2000)
-    }
-
-    // Poll deposit payment
-    pollDepositPayment(payment.payment_id, totalAmount)
-
-  } catch(e) {
-    alert('Error: ' + e.message)
-  }
-
-  btn.disabled = false
-  btn.textContent = 'DEPOSIT & PLAY'
-})
-
-function pollDepositPayment(paymentId, amount) {
-  if(depositPollInterval) clearInterval(depositPollInterval)
-  depositPollInterval = setInterval(async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/check-payment?id=${paymentId}`)
-      const data = await res.json()
-      const statusEl = document.getElementById('pay-status')
-
-      if(data.payment_status === 'finished' || data.payment_status === 'confirmed') {
-        clearInterval(depositPollInterval)
-        statusEl.innerHTML = '<span class="status-badge status-confirmed">✓ Confirmed!</span>'
-
-        // Add balance to user in Supabase
-        const newBalance = myBalance + amount
-        await db.from('users').update({ 
-          balance: newBalance,
-          total_deposited: db.rpc ? newBalance : newBalance
-        }).eq('wallet', myWallet)
-
-        myBalance = newBalance
-        updateWalletUI()
-
-        setTimeout(() => {
-          document.getElementById('payment-modal').classList.remove('active')
-        }, 2000)
-
-      } else if(data.payment_status === 'failed' || data.payment_status === 'expired') {
-        clearInterval(depositPollInterval)
-        statusEl.innerHTML = '<span class="status-badge status-error">Failed / Expired</span>'
-      } else {
-        statusEl.innerHTML = `<span class="status-badge status-waiting">${data.payment_status}...</span>`
-      }
-    } catch(e) { console.error(e) }
-  }, 10000)
-}
-
-// Override buy button to use balance
-document.getElementById('buy-btn').addEventListener('click', () => {
-  if(!myWallet) {
-    document.getElementById('connect-modal').classList.add('active')
-    return
-  }
-  if(myBalance < 3) {
-    document.getElementById('dep-current-balance').textContent = `$${myBalance.toFixed(2)}`
-    document.getElementById('dep-new-balance').textContent = `$${(myBalance + depositAmount).toFixed(2)}`
-    document.getElementById('deposit-modal').classList.add('active')
-    return
-  }
-  openBuyModal()
-})
-
-
-// ─── DEPOSIT FLOW ─────────────────────────────────────────────────
-let depTiles = 5
-let depCoin = 'usdttrc20'
-
-function selectTiles(btn, tiles) {
-  document.querySelectorAll('.deposit-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
-  depTiles = tiles
-  const total = tiles * 3
-  document.getElementById('dep-tiles-count').textContent = `${tiles} tiles`
-  document.getElementById('dep-total-cost').textContent = `$${total}.00`
-  document.getElementById('dep-new-balance').textContent = `$${(myBalance + total).toFixed(2)}`
-  document.getElementById('dep-amount-preview') && (document.getElementById('dep-amount-preview').textContent = `$${total}.00`)
-}
-
-function selectDepCoin(btn, coin) {
-  document.querySelectorAll('.coin-btn-large').forEach(b => {
-    b.classList.remove('active')
-    b.querySelector('.coin-check').style.opacity = '0'
-  })
-  btn.classList.add('active')
-  btn.querySelector('.coin-check').style.opacity = '1'
-  depCoin = coin
-}
-
-function depNextStep(step) {
-  document.getElementById('dep-step-1').style.display = 'none'
-  document.getElementById('dep-step-2').style.display = 'none'
-  document.getElementById('dep-step-3').style.display = 'none'
-  document.getElementById(`dep-step-${step}`).style.display = 'block'
-
-  if(step === 3) {
-    const total = depTiles * 3
-    document.getElementById('dep-summary-amount').textContent = `$${total}.00`
-    document.getElementById('dep-summary-coin').textContent = depCoin.toUpperCase()
-    document.getElementById('dep-summary-tiles').textContent = `${depTiles} tiles`
-    const remaining = TOTAL_TILES - revealedTiles.size
-    document.getElementById('dep-summary-chance').textContent = `${(depTiles/Math.max(remaining,1)*100).toFixed(1)}%`
-
-    // Pre-fill wallet if connected
-    if(myWallet) document.getElementById('dep-wallet-input').value = myWallet
-  }
-}
-
-// Override deposit button click
-
-
-// ─── MENU ─────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// MENU
+// ════════════════════════════════════════════════════════════════
 function toggleMenu() {
-  const menu = document.getElementById('side-menu')
-  const overlay = document.getElementById('menu-overlay')
-  const burger = document.getElementById('hamburger')
-  menu.classList.toggle('open')
-  overlay.classList.toggle('open')
-  burger.classList.toggle('open')
+  document.getElementById('side-menu').classList.toggle('open')
+  document.getElementById('menu-overlay').classList.toggle('open')
+  document.getElementById('hamburger').classList.toggle('open')
 }
-
 function closeMenu() {
   document.getElementById('side-menu').classList.remove('open')
   document.getElementById('menu-overlay').classList.remove('open')
   document.getElementById('hamburger').classList.remove('open')
 }
-
 document.getElementById('menu-overlay').addEventListener('click', closeMenu)
 
-function selectCoffee(btn, amount) {
-  document.querySelectorAll('.coffee-amount-btn').forEach(b => b.classList.remove('active'))
-  btn.classList.add('active')
+// ════════════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════════════
+function showToast(msg, duration=3500) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.classList.add('show')
+  setTimeout(() => t.classList.remove('show'), duration)
 }
 
+// ════════════════════════════════════════════════════════════════
+// STATS UPDATE
+// ════════════════════════════════════════════════════════════════
+function updateStats() {
+  const rev  = revealed.size
+  const left = TOTAL - rev
+  const prize = (rev * PRICE * PRIZE_P).toFixed(2)
+  const pct   = (rev / TOTAL * 100).toFixed(0)
 
-// ─── REFERRAL SYSTEM ──────────────────────────────────────────────
-let myRefCode = ''
-let freeTiles = 0
+  document.getElementById('s-revealed').textContent = rev
+  document.getElementById('s-remaining').textContent = left
+  document.getElementById('s-prize').textContent = `$${prize}`
+  document.getElementById('hero-prize').textContent = `$${prize}`
+  document.getElementById('prize-val').textContent = `$${prize}`
+  document.getElementById('prog-revealed').textContent = rev
+  document.getElementById('prog-left').textContent = `${left} left`
+  document.getElementById('prog-fill').style.width = `${pct}%`
+}
 
-function initReferral() {
-  // Get or generate ref code based on timestamp + random
-  let stored = localStorage.getItem('hd_ref_code')
-  if(!stored) {
-    stored = 'hd_' + Math.random().toString(36).slice(2, 10)
-    localStorage.setItem('hd_ref_code', stored)
+// ════════════════════════════════════════════════════════════════
+// WALLET
+// ════════════════════════════════════════════════════════════════
+async function connectWallet(addr) {
+  if(!addr) return
+  myWallet = addr
+  localStorage.setItem('hd_wallet', addr)
+
+  try {
+    const { data } = await db.from('users').select('*').eq('wallet', addr).maybeSingle()
+    if(!data) {
+      await db.from('users').insert({ wallet: addr, balance: 0 })
+      myBalance = 0
+    } else {
+      myBalance = parseFloat(data.balance) || 0
+    }
+  } catch(e) { myBalance = 0 }
+
+  updateWalletUI()
+  closeModal('connect-modal')
+}
+
+function updateWalletUI() {
+  const short = myWallet.slice(0,6) + '...' + myWallet.slice(-4)
+  document.getElementById('wallet-short').textContent = short
+  document.getElementById('wallet-bal').innerHTML = `$${myBalance.toFixed(2)} <small>USDT</small>`
+  document.getElementById('wallet-connected').style.display = 'flex'
+  document.getElementById('wallet-disconnected').style.display = 'none'
+  document.getElementById('btn-connect').style.display = 'none'
+  document.getElementById('btn-deposit').style.display = 'block'
+  updateRevealBtn()
+}
+
+function updateRevealBtn() {
+  const btn = document.getElementById('btn-reveal')
+  if(myBalance >= PRICE) {
+    btn.textContent = `REVEAL A TILE ($${PRICE})`
+    btn.disabled = false
+  } else {
+    btn.textContent = myWallet ? 'DEPOSIT TO PLAY' : 'CONNECT WALLET'
+    btn.disabled = false
   }
-  myRefCode = stored
+}
 
-  // Load free tiles count
-  freeTiles = parseInt(localStorage.getItem('hd_free_tiles') || '0')
-  updateFreeTilesUI()
+document.getElementById('btn-connect').addEventListener('click', () => openModal('connect-modal'))
+document.getElementById('btn-connect-confirm').addEventListener('click', () => {
+  const v = document.getElementById('connect-input').value.trim()
+  if(!v) { document.getElementById('connect-input').classList.add('err'); return }
+  document.getElementById('connect-input').classList.remove('err')
+  connectWallet(v)
+})
 
-  // Set referral link
-  const refUrl = `${window.location.origin}${window.location.pathname}?ref=${myRefCode}`
-  document.getElementById('ref-link-input').value = refUrl
+// ════════════════════════════════════════════════════════════════
+// REFERRAL
+// ════════════════════════════════════════════════════════════════
+function initReferral() {
+  let code = localStorage.getItem('hd_ref')
+  if(!code) { code = 'hd_' + Math.random().toString(36).slice(2,10); localStorage.setItem('hd_ref', code) }
+  myRefCode = code
+  freeTiles = parseInt(localStorage.getItem('hd_free') || '0')
+  document.getElementById('free-count').textContent = freeTiles
 
-  // Copy button
-  document.getElementById('ref-copy-btn').addEventListener('click', () => {
-    navigator.clipboard.writeText(refUrl)
-    const btn = document.getElementById('ref-copy-btn')
-    btn.textContent = 'COPIED! ✓'
-    setTimeout(() => btn.textContent = 'COPY LINK', 2000)
+  const url = `${location.origin}${location.pathname}?ref=${code}`
+  document.getElementById('ref-link').value = url
+  document.getElementById('ref-copy').addEventListener('click', () => {
+    navigator.clipboard.writeText(url)
+    document.getElementById('ref-copy').textContent = 'COPIED!'
+    setTimeout(() => document.getElementById('ref-copy').textContent = 'COPY', 2000)
   })
 
-  // Check if this page was opened via referral
-  const urlParams = new URLSearchParams(window.location.search)
-  const refFrom = urlParams.get('ref')
-  if(refFrom && refFrom !== myRefCode) {
-    // Store who referred this user
-    localStorage.setItem('hd_referred_by', refFrom)
-  }
+  // Check incoming referral
+  const ref = new URLSearchParams(location.search).get('ref')
+  if(ref && ref !== myRefCode) localStorage.setItem('hd_referred_by', ref)
 
-  // Listen for referral rewards from Supabase
-  db.channel('referral-rewards')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'referral_rewards' }, payload => {
-      if(payload.new.ref_code === myRefCode) {
-        freeTiles++
-        localStorage.setItem('hd_free_tiles', freeTiles)
-        updateFreeTilesUI()
-        showFreeTileToast()
-      }
-    }).subscribe()
+  // Listen for referral rewards
+  db.channel('ref-rewards').on('postgres_changes', { event:'INSERT', schema:'public', table:'referral_rewards' }, p => {
+    if(p.new.ref_code === myRefCode) {
+      freeTiles++
+      localStorage.setItem('hd_free', freeTiles)
+      document.getElementById('free-count').textContent = freeTiles
+      showToast('🎉 You earned a FREE tile!')
+    }
+  }).subscribe()
 }
 
-function updateFreeTilesUI() {
-  document.getElementById('free-tiles-count').textContent = freeTiles
-  const notice = document.getElementById('free-tile-notice')
-  const availableEl = document.getElementById('free-tiles-available')
-  if(freeTiles > 0 && notice) {
-    notice.style.display = 'block'
-    if(availableEl) availableEl.textContent = freeTiles
-  }
-}
-
-function showFreeTileToast() {
-  const toast = document.getElementById('free-tile-toast')
-  toast.classList.add('show')
-  setTimeout(() => toast.classList.remove('show'), 4000)
-}
-
-async function useFreeeTile() {
-  if(freeTiles <= 0) return
-  if(!currentImageUrl) { alert('Please select an image first!'); return }
-
-  const unrevealed = []
-  for(let i = 0; i < TOTAL_TILES; i++) {
-    if(!revealedTiles.has(i)) unrevealed.push(i)
-  }
-  if(unrevealed.length === 0) { alert('All tiles revealed!'); return }
-
-  const tileId = unrevealed[Math.floor(Math.random() * unrevealed.length)]
-
-  // Use free tile
-  freeTiles--
-  localStorage.setItem('hd_free_tiles', freeTiles)
-  updateFreeTilesUI()
-
-  // Mark tile as revealed in Supabase
-  await db.from('tiles').update({
-    revealed: true,
-    wallet: 'free_tile',
-    revealed_at: new Date().toISOString()
-  }).eq('id', tileId).eq('image_id', currentImageId)
-
-  document.getElementById('buy-modal').classList.remove('active')
-  revealTileUI(tileId, 'free_tile')
-}
-
-// Credit referrer when payment is made
 async function creditReferrer() {
-  const referredBy = localStorage.getItem('hd_referred_by')
-  if(!referredBy) return
+  const ref = localStorage.getItem('hd_referred_by')
+  if(!ref) return
   try {
-    await db.from('referral_rewards').insert({ ref_code: referredBy, rewarded_at: new Date().toISOString() })
-    localStorage.removeItem('hd_referred_by') // Only credit once
-  } catch(e) { console.error('Referral credit error:', e) }
+    await db.from('referral_rewards').insert({ ref_code: ref })
+    localStorage.removeItem('hd_referred_by')
+  } catch(e) {}
 }
 
-// ─── START ────────────────────────────────────────────────────────
-window.addEventListener('load', async () => {
-  initWallet()
-  initReferral()
-  document.getElementById('loading-text').textContent = 'Loading images...'
-  await renderImageSelector('stadiums')
-  subscribeRealtime()
-  document.getElementById('loading-overlay').classList.add('hidden')
+// ════════════════════════════════════════════════════════════════
+// UNSPLASH IMAGES
+// ════════════════════════════════════════════════════════════════
+async function loadImages(cat, query) {
+  if(catCache[cat]) return catCache[cat]
+  try {
+    const r = await fetch(`https://api.unsplash.com/photos/random?query=${encodeURIComponent(query)}&count=10&orientation=squarish`, {
+      headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` }
+    })
+    const data = await r.json()
+    if(!Array.isArray(data)) return []
+    const imgs = data.map((img,i) => ({ id:img.id, thumb:img.urls.thumb, full:img.urls.regular, name:img.alt_description||`Image ${i+1}` }))
+    catCache[cat] = imgs
+    return imgs
+  } catch(e) { return [] }
+}
+
+async function renderImgSel(cat, query) {
+  const sel = document.getElementById('img-sel')
+  sel.innerHTML = ''
+  for(let i=0;i<10;i++) {
+    const ph = document.createElement('div')
+    ph.className = 'img-placeholder'
+    sel.appendChild(ph)
+  }
+  const imgs = await loadImages(cat, query)
+  sel.innerHTML = ''
+  imgs.forEach((img,i) => {
+    const d = document.createElement('div')
+    d.className = 'img-thumb'
+    d.innerHTML = `<img src="${img.thumb}" loading="lazy"/><span class="num">#${i+1}</span>`
+    d.addEventListener('click', () => selectImage(img, i))
+    sel.appendChild(d)
+  })
+  if(imgs.length > 0) selectImage(imgs[0], 0)
+}
+
+function selectImage(img, idx) {
+  curImgUrl = img.full
+  curImgId  = `${curCat}_${img.id}`
+
+  document.querySelectorAll('.img-thumb').forEach((t,i) => t.classList.toggle('active', i===idx))
+
+  const pi = document.getElementById('puzzle-img')
+  pi.src = img.full
+  pi.classList.remove('revealed')
+  pi.style.filter = 'blur(20px)'
+  pi.style.transform = 'scale(1.1)'
+
+  document.getElementById('puzzle-img-label').textContent = `#${idx+1}`
+  loadTileState(curImgId)
+}
+
+// ════════════════════════════════════════════════════════════════
+// TILE STATE
+// ════════════════════════════════════════════════════════════════
+async function loadTileState(imgId) {
+  try {
+    const { data } = await db.from('tiles').select('id').eq('revealed', true).eq('image_id', imgId)
+    revealed = new Set((data||[]).map(r => r.id))
+  } catch(e) { revealed = new Set() }
+  buildGrid()
+  updateStats()
+}
+
+function buildGrid() {
+  const g = document.getElementById('grid')
+  g.innerHTML = ''
+  for(let i=0;i<TOTAL;i++) {
+    const t = document.createElement('div')
+    t.className = 'tile'
+    t.dataset.i = i
+    if(revealed.has(i)) t.classList.add('revealed')
+    t.addEventListener('click', () => { if(!t.classList.contains('revealed')) handleRevealClick() })
+    g.appendChild(t)
+  }
+  checkLastTile()
+  checkAllRevealed()
+}
+
+function checkLastTile() {
+  if(TOTAL - revealed.size === 1)
+    document.querySelectorAll('.tile:not(.revealed)').forEach(t => t.classList.add('last'))
+}
+
+function checkAllRevealed() {
+  if(revealed.size === TOTAL) {
+    const pi = document.getElementById('puzzle-img')
+    pi.classList.add('revealed')
+  }
+}
+
+function revealTileUI(idx, wallet) {
+  revealed.add(idx)
+  const t = document.querySelector(`[data-i="${idx}"]`)
+  if(t) {
+    t.style.transition = 'all .5s ease'
+    t.style.transform = 'scale(1.08)'
+    t.style.boxShadow = '0 0 24px rgba(240,224,64,.5)'
+    setTimeout(() => {
+      t.classList.add('revealed')
+      t.style.transform = ''
+      t.style.boxShadow = ''
+    }, 280)
+  }
+  addActivity(wallet, idx)
+  updateStats()
+  checkLastTile()
+  checkAllRevealed()
+  if(revealed.size === TOTAL) setTimeout(showWinner, 800)
+}
+
+// ════════════════════════════════════════════════════════════════
+// ACTIVITY FEED
+// ════════════════════════════════════════════════════════════════
+function addActivity(wallet, idx) {
+  const list = document.getElementById('activity')
+  const placeholder = list.querySelector('div[style]')
+  if(placeholder) list.innerHTML = ''
+  const short = wallet ? wallet.slice(0,6)+'...'+wallet.slice(-4) : 'anonymous'
+  const item = document.createElement('div')
+  item.className = 'act-item'
+  item.innerHTML = `<div class="act-dot"></div><div class="act-text"><b>${short}</b> revealed #${idx}</div><div class="act-time">now</div>`
+  list.insertBefore(item, list.firstChild)
+  if(list.children.length > 10) list.removeChild(list.lastChild)
+}
+
+// ════════════════════════════════════════════════════════════════
+// REALTIME
+// ════════════════════════════════════════════════════════════════
+function initRealtime() {
+  db.channel('tiles-rt').on('postgres_changes', { event:'UPDATE', schema:'public', table:'tiles' }, p => {
+    if(p.new.revealed && p.new.image_id === curImgId && !revealed.has(p.new.id)) {
+      revealTileUI(p.new.id, p.new.wallet || 'anonymous')
+    }
+  }).subscribe()
+}
+
+// ════════════════════════════════════════════════════════════════
+// REVEAL CLICK HANDLER
+// ════════════════════════════════════════════════════════════════
+function handleRevealClick() {
+  if(!myWallet) { openModal('connect-modal'); return }
+  if(myBalance < PRICE) { openDepositModal(); return }
+  openModal('reveal-confirm-modal')
+}
+
+document.getElementById('btn-reveal').addEventListener('click', () => {
+  if(!curImgUrl) { showToast('Please select an image first!'); return }
+  handleRevealClick()
 })
-</script>
 
+// ════════════════════════════════════════════════════════════════
+// REVEAL CONFIRM - direct deduction from balance
+// ════════════════════════════════════════════════════════════════
+async function doReveal() {
+  if(!myWallet || myBalance < PRICE || !curImgUrl) return
 
+  const unrev = []
+  for(let i=0;i<TOTAL;i++) if(!revealed.has(i)) unrev.push(i)
+  if(!unrev.length) { showToast('All tiles already revealed!'); return }
 
+  const tileId = unrev[Math.floor(Math.random() * unrev.length)]
+
+  // Deduct balance
+  const newBal = myBalance - PRICE
+  try {
+    await db.from('users').update({ balance: newBal }).eq('wallet', myWallet)
+    myBalance = newBal
+    updateWalletUI()
+  } catch(e) { showToast('Error deducting balance'); return }
+
+  // Reveal tile
+  try {
+    await db.from('tiles').upsert({
+      id: tileId, image_id: curImgId, revealed: true,
+      wallet: myWallet, revealed_at: new Date().toISOString()
+    }, { onConflict: 'id,image_id' })
+    revealTileUI(tileId, myWallet)
+    creditReferrer()
+  } catch(e) {
+    // Refund on error
+    await db.from('users').update({ balance: myBalance + PRICE }).eq('wallet', myWallet)
+    myBalance += PRICE
+    updateWalletUI()
+    showToast('Error revealing tile, balance refunded')
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// DEPOSIT FLOW
+// ════════════════════════════════════════════════════════════════
+function openDepositModal() {
+  depTiles = 5
+  depCoin  = 'usdttrc20'
+
+  // Reset tile opts
+  document.querySelectorAll('.tile-opt').forEach((o,i) => o.classList.toggle('active', i===0))
+  // Reset coin opts
+  document.querySelectorAll('.coin-opt').forEach((o,i) => o.classList.toggle('active', i===0))
+
+  updateDepSummary()
+  dsGo(1)
+  openModal('deposit-modal')
+}
+
+document.getElementById('btn-deposit').addEventListener('click', openDepositModal)
+
+function pickTiles(el, n) {
+  document.querySelectorAll('.tile-opt').forEach(o => o.classList.remove('active'))
+  el.classList.add('active')
+  depTiles = n
+  updateDepSummary()
+}
+
+function pickCoin(el, coin) {
+  document.querySelectorAll('.coin-opt').forEach(o => o.classList.remove('active'))
+  el.classList.add('active')
+  depCoin = coin
+}
+
+function updateDepSummary() {
+  const total = depTiles * PRICE
+  document.getElementById('d-tiles').textContent  = `${depTiles} tiles`
+  document.getElementById('d-total').textContent  = `$${total.toFixed(2)}`
+  document.getElementById('d-current').textContent = `$${myBalance.toFixed(2)}`
+  document.getElementById('d-after').textContent  = `$${(myBalance + total).toFixed(2)}`
+}
+
+function dsGo(step) {
+  for(let i=1;i<=3;i++) {
+    const s = document.getElementById(`ds${i}`)
+    const p = document.getElementById(`sp${i}`)
+    if(s) s.style.display = i===step ? 'block' : 'none'
+    if(p) { p.classList.toggle('active', i===step); p.classList.toggle('done', i<step) }
+  }
+  if(step === 3) {
+    const total = depTiles * PRICE
+    const left  = TOTAL - revealed.size
+    document.getElementById('d-final-amt').textContent   = `$${total.toFixed(2)}`
+    document.getElementById('d-final-coin').textContent  = depCoin.toUpperCase()
+    document.getElementById('d-final-tiles').textContent = `${depTiles} tiles`
+    document.getElementById('d-final-chance').textContent = `${(depTiles/Math.max(left,1)*100).toFixed(1)}%`
+    if(myWallet) document.getElementById('dep-wallet').value = myWallet
+  }
+}
+
+document.getElementById('btn-pay-now').addEventListener('click', async () => {
+  const w = document.getElementById('dep-wallet').value.trim()
+  if(!w) { document.getElementById('dep-wallet').classList.add('err'); return }
+  document.getElementById('dep-wallet').classList.remove('err')
+
+  if(!myWallet) await connectWallet(w)
+
+  const btn = document.getElementById('btn-pay-now')
+  btn.disabled = true
+  btn.textContent = 'Creating payment...'
+
+  const amount = depTiles * PRICE
+
+  try {
+    const res = await fetch(`${API_URL}/api/create-payment`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pay_currency: depCoin, amount, wallet: w, type: 'deposit' })
+    })
+    const pay = await res.json()
+    if(!pay.pay_address) throw new Error(pay.error || 'Payment creation failed')
+
+    closeModal('deposit-modal')
+    document.getElementById('pm-amount').textContent  = `${pay.pay_amount} ${depCoin.toUpperCase()}`
+    document.getElementById('pm-network').textContent = depCoin.toUpperCase()
+    document.getElementById('pm-address').textContent = pay.pay_address
+    document.getElementById('pm-status').innerHTML    = '<span class="status-badge status-wait">Waiting for payment...</span>'
+    openModal('payment-modal')
+
+    document.getElementById('pm-copy').onclick = () => {
+      navigator.clipboard.writeText(pay.pay_address)
+      document.getElementById('pm-copy').textContent = 'Copied! ✓'
+      setTimeout(() => document.getElementById('pm-copy').textContent = 'Copy Address', 2000)
+    }
+
+    pollPayment(pay.payment_id, amount, w)
+
+  } catch(e) {
+    showToast('Error: ' + e.message)
+  }
+
+  btn.disabled = false
+  btn.textContent = 'PAY NOW 🚀'
+})
+
+function pollPayment(payId, amount, wallet) {
+  if(pollTimer) clearInterval(pollTimer)
+  pollTimer = setInterval(async () => {
+    try {
+      const r = await fetch(`${API_URL}/api/check-payment?id=${payId}`)
+      const d = await r.json()
+      const statusEl = document.getElementById('pm-status')
+
+      if(d.payment_status === 'finished' || d.payment_status === 'confirmed') {
+        clearInterval(pollTimer)
+        statusEl.innerHTML = '<span class="status-badge status-ok">✓ Confirmed!</span>'
+
+        // Update balance in Supabase
+        const newBal = myBalance + amount
+        await db.from('users').update({ balance: newBal }).eq('wallet', wallet)
+        myBalance = newBal
+        updateWalletUI()
+        showToast(`✅ $${amount} added! You have ${depTiles} tiles ready.`)
+        setTimeout(() => closeModal('payment-modal'), 2000)
+
+      } else if(d.payment_status === 'failed' || d.payment_status === 'expired') {
+        clearInterval(pollTimer)
+        statusEl.innerHTML = '<span class="status-badge status-err">Failed / Expired</span>'
+      } else {
+        statusEl.innerHTML = `<span class="status-badge status-wait">${d.payment_status}...</span>`
+      }
+    } catch(e) { console.error(e) }
+  }, 10000)
+}
+
+// ════════════════════════════════════════════════════════════════
+// CATEGORIES
+// ════════════════════════════════════════════════════════════════
+document.querySelectorAll('.cat').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.cat').forEach(b => b.classList.remove('active'))
+    btn.classList.add('active')
+    curCat = btn.dataset.cat
+    document.getElementById('cat-name').textContent = btn.dataset.cat.toUpperCase()
+    document.getElementById('load-text').textContent = `Loading ${curCat}...`
+    document.getElementById('loading').classList.remove('fade')
+    await renderImgSel(curCat, btn.dataset.q)
+    document.getElementById('loading').classList.add('fade')
+  })
+})
+
+// ════════════════════════════════════════════════════════════════
+// COFFEE
+// ════════════════════════════════════════════════════════════════
+function selectCoffee(el, amt) {
+  document.querySelectorAll('#coffee-modal .tile-opt').forEach(o => o.classList.remove('active'))
+  el.classList.add('active')
+}
+
+// ════════════════════════════════════════════════════════════════
+// WINNER
+// ════════════════════════════════════════════════════════════════
+function showWinner() {
+  spawnConfetti()
+  setTimeout(() => showToast('🏆 ALL TILES REVEALED! Winner gets the prize!', 6000), 300)
+}
+
+function spawnConfetti() {
+  const colors = ['#f0e040','#ff4444','#4dff88','#4d88ff','#fff']
+  for(let i=0;i<80;i++) {
+    const c = document.createElement('div')
+    c.className = 'confetti'
+    c.style.cssText = `left:${Math.random()*100}vw;top:-20px;width:8px;height:8px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'0'};animation-delay:${Math.random()*2}s`
+    document.body.appendChild(c)
+    setTimeout(() => c.remove(), 3500)
+  }
+}
+
+// ════════════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  document.getElementById('load-text').textContent = 'Loading images...'
+  initReferral()
+
+  // Restore wallet
+  const saved = localStorage.getItem('hd_wallet')
+  if(saved) await connectWallet(saved)
+  else updateRevealBtn()
+
+  await renderImgSel('stadiums', 'football stadium aerial view')
+  initRealtime()
+
+  setTimeout(() => document.getElementById('loading').classList.add('fade'), 200)
+})
 </script>
 </body>
 </html>
