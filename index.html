@@ -248,6 +248,19 @@
     .step-progress { display: flex; gap: 6px; margin-bottom: 20px; }
     .step-dot { flex: 1; height: 3px; background: var(--border); border-radius: 2px; }
     .step-dot.active { background: var(--accent); }
+
+    /* DEPOSIT STEPS */
+    .dep-steps { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; }
+    .dep-step { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); }
+    .dep-step.active { color: var(--accent); border-color: var(--accent); background: rgba(240,224,64,0.05); }
+    .dep-step-arrow { color: var(--muted); font-size: 0.7rem; }
+    .coin-btn-large { display: flex; align-items: center; gap: 14px; width: 100%; padding: 14px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 4px; color: var(--text); cursor: pointer; transition: all 0.2s; text-align: left; font-family: 'DM Sans', sans-serif; }
+    .coin-btn-large:hover { border-color: var(--accent); }
+    .coin-btn-large.active { border-color: var(--accent); background: rgba(240,224,64,0.05); }
+    .coin-btn-large div { flex: 1; }
+    .coin-btn-large b { display: block; font-size: 0.9rem; color: var(--text); }
+    .coin-btn-large small { font-size: 0.72rem; color: var(--muted); }
+    .ccheck { color: var(--accent); font-size: 1rem; }
   </style>
 </head>
 <body>
@@ -557,6 +570,245 @@
     </div>
     <div class="coffee-address-box">
       <div class="coffee-network">USDT · TRC20 Network</div>
+      <div class="coffee-address" id="coffee-wallet-address"></div>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
+    </div>
+    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Send any amount of USDT (TRC20) to the address above. Thank you! 🙏</p>
+  </div>
+</div>
+
+
+
+
+
+</script>
+</body>
+</html<!-- DEPOSIT MODAL -->
+<div class="modal-overlay" id="deposit-modal">
+  <div class="modal deposit-modal">
+    <button class="modal-close" id="dep-close-btn">✕</button>
+
+    <!-- STEP INDICATORS -->
+    <div class="dep-steps">
+      <div class="dep-step active" id="dep-indicator-1">1. Tiles</div>
+      <div class="dep-step-arrow">→</div>
+      <div class="dep-step" id="dep-indicator-2">2. Currency</div>
+      <div class="dep-step-arrow">→</div>
+      <div class="dep-step" id="dep-indicator-3">3. Pay</div>
+    </div>
+
+    <!-- STEP 1: Tiles -->
+    <div id="dep-step-1">
+      <h2>How Many Tiles?</h2>
+      <p>Each tile costs $3. Minimum deposit is $15 (5 tiles).</p>
+      <div class="deposit-amounts" id="dep-tiles-btns">
+        <button class="deposit-btn active" data-tiles="5" onclick="selectTiles(this,5)"><b>5 tiles</b>$15</button>
+        <button class="deposit-btn" data-tiles="10" onclick="selectTiles(this,10)"><b>10 tiles</b>$30</button>
+        <button class="deposit-btn" data-tiles="20" onclick="selectTiles(this,20)"><b>20 tiles</b>$60</button>
+        <button class="deposit-btn" data-tiles="33" onclick="selectTiles(this,33)"><b>33 tiles</b>$99</button>
+      </div>
+      <div class="balance-preview">
+        <div><span>Tiles</span><span id="dep-tiles-label">5 tiles</span></div>
+        <div><span>Total</span><span id="dep-total-label">$15.00</span></div>
+        <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
+        <div><span>New balance</span><span id="dep-new-balance">$15.00</span></div>
+      </div>
+      <button class="btn-confirm" onclick="depGoStep(2)">NEXT →</button>
+    </div>
+
+    <!-- STEP 2: Currency -->
+    <div id="dep-step-2" style="display:none;">
+      <h2>Pay With</h2>
+      <p>Choose your cryptocurrency.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;">
+        <button class="coin-btn-large active" id="dep-coin-usdttrc20" onclick="selectDepCoin('usdttrc20')">
+          <span>💵</span><div><b>USDT TRC20</b><small>Stable — 1 USDT = $1</small></div><span class="ccheck">✓</span>
+        </button>
+        <button class="coin-btn-large" id="dep-coin-btc" onclick="selectDepCoin('btc')">
+          <span>₿</span><div><b>Bitcoin</b><small>BTC</small></div><span class="ccheck" style="opacity:0">✓</span>
+        </button>
+        <button class="coin-btn-large" id="dep-coin-eth" onclick="selectDepCoin('eth')">
+          <span>⟠</span><div><b>Ethereum</b><small>ETH</small></div><span class="ccheck" style="opacity:0">✓</span>
+        </button>
+        <button class="coin-btn-large" id="dep-coin-trx" onclick="selectDepCoin('trx')">
+          <span>⚡</span><div><b>TRON</b><small>TRX — fast & cheap</small></div><span class="ccheck" style="opacity:0">✓</span>
+        </button>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-confirm" style="background:var(--border);color:var(--muted);flex:1;" onclick="depGoStep(1)">← BACK</button>
+        <button class="btn-confirm" style="flex:2;" onclick="depGoStep(3)">NEXT →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Pay -->
+    <div id="dep-step-3" style="display:none;">
+      <h2>Complete Payment</h2>
+      <p>Confirm your details and pay.</p>
+      <div class="balance-preview" style="margin-bottom:16px;">
+        <div><span>Amount</span><span id="dep-final-amount">$15.00</span></div>
+        <div><span>Currency</span><span id="dep-final-coin">USDT TRC20</span></div>
+        <div><span>Tiles</span><span id="dep-final-tiles">5 tiles</span></div>
+        <div><span>Win chance</span><span id="dep-final-chance">5%</span></div>
+      </div>
+      <div class="wallet-input-wrap" style="margin-bottom:16px;">
+        <label>YOUR WALLET (to receive winnings)</label>
+        <input type="text" id="dep-wallet-input" placeholder="Your crypto wallet address" />
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-confirm" style="background:var(--border);color:var(--muted);flex:1;" onclick="depGoStep(2)">← BACK</button>
+        <button class="btn-confirm" style="flex:2;" id="confirm-deposit-btn">PAY NOW 🚀</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BUY MODAL -->
+<div class="modal-overlay" id="buy-modal">
+  <div class="modal">
+    <button class="modal-close" id="modal-close">✕</button>
+    <h2>Reveal a Tile</h2>
+    <p>Pay $3 USDT to reveal a random tile. The image stays blurred until ALL tiles are revealed. Last tile wins the prize!</p>
+    <div class="tile-info">
+      <div><span>Price</span><span>$3.00 USDT</span></div>
+      <div><span>Tiles remaining</span><span id="modal-remaining">100</span></div>
+      <div><span>Win chance</span><span id="modal-chance">1%</span></div>
+      <div><span>Prize pool</span><span id="modal-prize">$0.00</span></div>
+    </div>
+    <div class="wallet-input-wrap">
+      <label>YOUR WALLET (to receive prize if you win)</label>
+      <input type="text" id="wallet-input" placeholder="Your crypto wallet address" />
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
+      <div class="coin-select">
+        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
+        <button class="coin-btn" data-coin="btc">BTC</button>
+        <button class="coin-btn" data-coin="eth">ETH</button>
+        <button class="coin-btn active" data-coin="trx">TRX</button>
+      </div>
+    </div>
+    <div id="free-tile-notice" style="display:none;background:linear-gradient(135deg,#0d2000,#1a3300);border:1px solid #4dff88;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:0.75rem;color:#4dff88;text-align:center;">
+  🎁 You have <b id="free-tiles-available">0</b> free tile(s)! Use one instead of paying?
+  <br/><button onclick="useFreeeTile()" style="margin-top:8px;background:#4dff88;color:#000;border:none;border-radius:4px;padding:6px 16px;font-family:'Space Mono',monospace;font-size:0.7rem;cursor:pointer;font-weight:700;">USE FREE TILE</button>
+</div>
+<button class="btn-confirm" id="confirm-pay">PAY $3 & REVEAL</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payment-modal">
+  <div class="modal">
+    <button class="modal-close" id="payment-close">✕</button>
+    <h2>Complete Payment</h2>
+    <p>Send exactly the amount below. Your tile reveals automatically after confirmation.</p>
+    <div class="tile-info">
+      <div><span>Amount</span><span id="pay-amount">—</span></div>
+      <div><span>Network</span><span id="pay-network">—</span></div>
+      <div><span>Status</span><span id="pay-status"><span class="status-badge status-waiting">Waiting...</span></span></div>
+    </div>
+    <div class="payment-address-box">
+      <div class="address" id="pay-address">Generating...</div>
+      <button class="copy-btn" id="copy-address-btn">Copy Address</button>
+    </div>
+    <p style="text-align:center;font-size:0.75rem;color:var(--muted);">Waiting for blockchain confirmation (1-5 min)</p>
+  </div>
+</div>
+
+<!-- CONNECT WALLET MODAL -->
+<div class="modal-overlay" id="connect-modal">
+  <div class="modal connect-modal">
+    <button class="modal-close" onclick="document.getElementById('connect-modal').classList.remove('active')">✕</button>
+    <h2>Connect Wallet</h2>
+    <p>Enter your crypto wallet address to save your balance and winnings across sessions.</p>
+    <div class="manual-wallet-wrap">
+      <label>YOUR WALLET ADDRESS</label>
+      <input type="text" id="connect-wallet-input" placeholder="0x... or TRC20 address" />
+    </div>
+    <br/>
+    <button class="btn-confirm" id="confirm-connect-btn">CONNECT</button>
+  </div>
+</div>
+
+<!-- DEPOSIT MODAL -->
+<div class="modal-overlay" id="deposit-modal">
+  <div class="modal deposit-modal">
+    <button class="modal-close" onclick="document.getElementById('deposit-modal').classList.remove('active')">✕</button>
+    <h2>Deposit Funds</h2>
+    <p>Add USDT to your balance and use it to reveal tiles anytime.</p>
+    <div class="deposit-amounts">
+      <button class="deposit-btn active" data-amount="5" onclick="selectDeposit(this,5)"><b>$5</b>5 tiles</button>
+      <button class="deposit-btn" data-amount="10" onclick="selectDeposit(this,10)"><b>$10</b>10 tiles</button>
+      <button class="deposit-btn" data-amount="20" onclick="selectDeposit(this,20)"><b>$20</b>20 tiles</button>
+      <button class="deposit-btn" data-amount="50" onclick="selectDeposit(this,50)"><b>$50</b>50 tiles</button>
+    </div>
+    <div class="balance-preview">
+      <div><span>Current balance</span><span id="dep-current-balance">$0.00</span></div>
+      <div><span>Depositing</span><span id="dep-amount-preview">$5.00</span></div>
+      <div><span>New balance</span><span id="dep-new-balance">$5.00</span></div>
+    </div>
+    <div style="margin-bottom:16px;">
+      <div style="font-family:'Space Mono',monospace;font-size:0.7rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px;">PAY WITH</div>
+      <div class="coin-select">
+        <button class="coin-btn" data-coin="usdttrc20">USDT</button>
+        <button class="coin-btn" data-coin="btc">BTC</button>
+        <button class="coin-btn" data-coin="eth">ETH</button>
+        <button class="coin-btn active" data-coin="trx">TRX</button>
+      </div>
+    </div>
+    <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
+  </div>
+</div>
+
+<!-- PRIVACY MODAL -->
+<div class="modal-overlay" id="privacy-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('privacy-modal').classList.remove('active')">✕</button>
+    <h2>Privacy Policy</h2>
+    <p>HiddenDrop does not collect personal information. The only data we store is your crypto wallet address (which you provide voluntarily) to send prizes. We do not share your data with third parties. Payments are processed by NOWPayments. Game state is stored on Supabase.</p>
+  </div>
+</div>
+
+<!-- SECURITY MODAL -->
+<div class="modal-overlay" id="security-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('security-modal').classList.remove('active')">✕</button>
+    <h2>Security</h2>
+    <p>All payments are processed through NOWPayments, a trusted crypto payment processor. We never store your private keys or payment details. Prize payouts are sent directly to the wallet address you provide. Tile state is recorded on Supabase with real-time verification.</p>
+  </div>
+</div>
+
+<!-- HOW IT WORKS MODAL -->
+<div class="modal-overlay" id="howto-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('howto-modal').classList.remove('active')">✕</button>
+    <h2>How it Works</h2>
+    <p>1. Choose a category and select a mystery image.<br/><br/>2. Pay $3 USDT to reveal a random tile. The image stays blurred the whole time — no matter how many tiles are revealed!<br/><br/>3. The player who reveals the LAST tile wins 20% of the total prize pool, sent instantly to their wallet.<br/><br/>4. After the last tile, a new round begins with a fresh image!</p>
+  </div>
+</div>
+
+<!-- COFFEE MODAL -->
+<div class="modal-overlay" id="coffee-modal">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('coffee-modal').classList.remove('active')">✕</button>
+    <h2>☕ Buy Me a Coffee</h2>
+    <p>Enjoying HiddenDrop? Support the developer with a small crypto donation. Every coffee keeps the server running!</p>
+    <div class="coffee-amounts">
+      <button class="coffee-amount-btn active" data-amount="1" onclick="selectCoffee(this,'1')">
+        <span class="coffee-emoji">☕</span>$1
+      </button>
+      <button class="coffee-amount-btn" data-amount="3" onclick="selectCoffee(this,'3')">
+        <span class="coffee-emoji">☕☕</span>$3
+      </button>
+      <button class="coffee-amount-btn" data-amount="5" onclick="selectCoffee(this,'5')">
+        <span class="coffee-emoji">☕☕☕</span>$5
+      </button>
+      <button class="coffee-amount-btn" data-amount="10" onclick="selectCoffee(this,'10')">
+        <span class="coffee-emoji">🏆</span>$10
+      </button>
+    </div>
+    <div class="coffee-address-box">
+      <div class="coffee-network">USDT · TRC20 Network</div>
       <div class="coffee-address" id="coffee-wallet-address">TCgzzpfsGqEovDxkDRXWQHu4HV9Xh2QhZN</div>
       <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('coffee-wallet-address').textContent);this.textContent='Copied! ✓';setTimeout(()=>this.textContent='Copy Address',2000)">Copy Address</button>
     </div>
@@ -572,7 +824,6 @@ const SUPABASE_URL = 'https://rpzneagbkrmhyecnpona.supabase.co'
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwem5lYWdia3JtaHllY25wb25hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzNDYxNDUsImV4cCI6MjA5NTkyMjE0NX0.m_Sl1-8pmg_RJRJlk6vlv5bZb3aMdFs-rx6Rd0y4n_c'
 const UNSPLASH_KEY = 'sGPosKRP-OM1Gy91upR0fWuuRBpmTOy5wYhKpphYG_g'
 const API_URL = 'https://hiddendrop.onrender.com'
-
 // ─── INIT ─────────────────────────────────────────────────────────
 const { createClient } = supabase
 const db = createClient(SUPABASE_URL, SUPABASE_KEY)
