@@ -12,12 +12,16 @@ const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_K
 // ─── CREATE PAYMENT ───────────────────────────────────────────────
 app.post('/api/create-payment', async (req, res) => {
   const { pay_currency, amount, tile_id, image_id, wallet, type } = req.body
+  console.log('Incoming request:', { pay_currency, amount, tile_id, image_id, wallet, type })
   try {
     const isDeposit = type === 'deposit'
     const price = isDeposit ? amount : 2.00
+    const currency = (pay_currency || 'USDTTRC20').toUpperCase()
     const orderId = isDeposit
       ? `deposit_${wallet}_${Date.now()}`
       : `tile_${image_id}_${tile_id}_${Date.now()}`
+
+    console.log('Sending to NOWPayments:', { price, currency, orderId })
 
     const response = await fetch('https://api.nowpayments.io/v1/payment', {
       method: 'POST',
@@ -25,13 +29,15 @@ app.post('/api/create-payment', async (req, res) => {
       body: JSON.stringify({
         price_amount: price,
         price_currency: 'usd',
-pay_currency: pay_currency.toUpperCase(),        order_id: orderId,
+        pay_currency: currency,
+        order_id: orderId,
         order_description: isDeposit ? `HiddenDrop Deposit $${amount}` : `HiddenDrop Tile #${tile_id}`,
         ipn_callback_url: `${process.env.SITE_URL}/api/webhook`
       })
     })
 
     const payment = await response.json()
+    console.log('NOWPayments response:', JSON.stringify(payment))
     if(!payment.pay_address) return res.status(500).json({ error: 'Payment failed', details: payment })
 
     return res.json({
