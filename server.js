@@ -25,8 +25,7 @@ app.post('/api/create-payment', async (req, res) => {
       body: JSON.stringify({
         price_amount: price,
         price_currency: 'usd',
-        pay_currency,
-        order_id: orderId,
+pay_currency: pay_currency.toUpperCase(),        order_id: orderId,
         order_description: isDeposit ? `HiddenDrop Deposit $${amount}` : `HiddenDrop Tile #${tile_id}`,
         ipn_callback_url: `${process.env.SITE_URL}/api/webhook`
       })
