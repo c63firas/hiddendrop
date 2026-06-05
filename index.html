@@ -421,7 +421,7 @@
         <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
         <button class="coin-btn" data-coin="btc">BTC</button>
         <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn" data-coin="trx">TRX</button>
+        <button class="coin-btn" data-coin="trx" class="coin-btn active">TRX</button>
       </div>
     </div>
     <div id="free-tile-notice" style="display:none;background:linear-gradient(135deg,#0d2000,#1a3300);border:1px solid #4dff88;border-radius:4px;padding:12px 16px;margin-bottom:16px;font-family:'Space Mono',monospace;font-size:0.75rem;color:#4dff88;text-align:center;">
@@ -489,7 +489,7 @@
         <button class="coin-btn active" data-coin="usdttrc20">USDT</button>
         <button class="coin-btn" data-coin="btc">BTC</button>
         <button class="coin-btn" data-coin="eth">ETH</button>
-        <button class="coin-btn" data-coin="trx">TRX</button>
+        <button class="coin-btn" data-coin="trx" class="coin-btn active">TRX</button>
       </div>
     </div>
     <button class="btn-confirm" id="confirm-deposit-btn">DEPOSIT & PLAY</button>
@@ -569,7 +569,7 @@ const TILE_PRICE = 2.00
 const PRIZE_PERCENT = 0.20
 
 let revealedTiles = new Set()
-let selectedCoin = 'usdttrc20'
+let selectedCoin = 'trx'
 let currentImageUrl = ''
 let currentImageId = null
 let currentCategory = 'stadiums'
