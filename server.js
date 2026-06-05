@@ -46,6 +46,19 @@ app.post('/api/create-payment', async (req, res) => {
   }
 })
 
+// ─── GET CURRENCIES ───────────────────────────────────────────────
+app.get("/api/currencies", async (req, res) => {
+  try {
+    const response = await fetch("https://api.nowpayments.io/v1/merchant/coins", {
+      headers: { "x-api-key": process.env.NOWPAYMENTS_KEY }
+    })
+    const data = await response.json()
+    return res.json(data)
+  } catch(e) {
+    return res.status(500).json({ error: e.message })
+  }
+})
+
 // ─── CHECK PAYMENT ────────────────────────────────────────────────
 app.get('/api/check-payment', async (req, res) => {
   const { id } = req.query
