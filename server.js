@@ -9,6 +9,17 @@ app.use(express.json())
 
 const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
+// ─── TELEGRAM ─────────────────────────────────────────────────────
+async function sendTelegram(msg) {
+  try {
+    await fetch(`https://api.telegram.org/bot${process.env.8919737686:AAEw3QREj8sdy0RFRxo9qMazMQrVo7eZCME}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: process.env.1089976850, text: msg, parse_mode: 'HTML' })
+    })
+  } catch(e) { console.error('Telegram error:', e) }
+}
+
 // ─── CREATE PAYMENT ───────────────────────────────────────────────
 app.post('/api/create-payment', async (req, res) => {
   const { pay_currency, amount, tile_id, image_id, wallet, type } = req.body
@@ -108,6 +119,9 @@ app.post('/api/webhook', async (req, res) => {
       const newBalance = (parseFloat(user?.balance) || 0) + amount
       await db.from('users').update({ balance: newBalance, total_deposited: newBalance }).eq('wallet', wallet)
 
+      // Telegram notification
+      await sendTelegram(`💰 <b>New Deposit!</b>\n\n👛 Wallet: <code>${wallet.slice(0,8)}...${wallet.slice(-6)}</code>\n💵 Amount: <b>$${amount}</b>\n⏰ ${new Date().toLocaleString()}`)
+
     } else {
       // Tile payment: tile_IMAGEID_TILEID_TIMESTAMP
       const parts = order_id.split('_')
@@ -119,6 +133,9 @@ app.post('/api/webhook', async (req, res) => {
         payment_id,
         revealed_at: new Date().toISOString()
       }).eq('id', tileId).eq('image_id', imageId)
+
+      // Telegram notification
+      await sendTelegram(`🎮 <b>Tile Revealed!</b>\n\n🔲 Tile: <b>#${tileId}</b>\n🖼 Image: ${imageId}\n⏰ ${new Date().toLocaleString()}`)
     }
 
     return res.json({ ok: true })
