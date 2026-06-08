@@ -892,12 +892,10 @@ async function loadTileState(imgId) {
     const { data } = await db.from('tiles').select('id').eq('image_id', imgId)
     const allRows = data || []
     
-    // Check if this image already has pre-revealed tiles in DB
-    const hasPreRevealed = allRows.some(r => r.wallet === 'pre_revealed')
     revealed = new Set(allRows.filter(r => r.revealed).map(r => r.id))
 
-    // Only pre-reveal if image is brand new (never been set up before)
-    if(!hasPreRevealed) {
+    // Only pre-reveal if image has NO tiles at all in DB
+    if(allRows.length === 0) {
       const preCount = Math.floor(Math.random() * 21) + 30 // 30 to 50
       const allTiles = Array.from({length: 100}, (_,i) => i)
       const shuffled = allTiles.sort(() => Math.random() - 0.5)
