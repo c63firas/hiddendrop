@@ -889,17 +889,21 @@ function selectImage(img, idx) {
 // ════════════════════════════════════════════════════════════════
 async function loadTileState(imgId) {
   try {
-    const { data } = await db.from('tiles').select('id').eq('revealed', true).eq('image_id', imgId)
-    revealed = new Set((data||[]).map(r => r.id))
+    const { data } = await db.from('tiles').select('id').eq('image_id', imgId)
+    const allRows = data || []
+    
+    // Check if this image already has pre-revealed tiles in DB
+    const hasPreRevealed = allRows.some(r => r.wallet === 'pre_revealed')
+    revealed = new Set(allRows.filter(r => r.revealed).map(r => r.id))
 
-    // If new image (less than 10 revealed), pre-reveal 30-50 random tiles
-    if(revealed.size < 10) {
+    // Only pre-reveal if image is brand new (never been set up before)
+    if(!hasPreRevealed) {
       const preCount = Math.floor(Math.random() * 21) + 30 // 30 to 50
       const allTiles = Array.from({length: 100}, (_,i) => i)
       const shuffled = allTiles.sort(() => Math.random() - 0.5)
       const toReveal = shuffled.slice(0, preCount)
 
-      // Insert pre-revealed tiles to Supabase
+      // Insert pre-revealed tiles to Supabase once
       const rows = toReveal.map(id => ({
         id,
         image_id: imgId,
