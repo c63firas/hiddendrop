@@ -889,33 +889,8 @@ function selectImage(img, idx) {
 // ════════════════════════════════════════════════════════════════
 async function loadTileState(imgId) {
   try {
-    const { data } = await db.from('tiles').select('id').eq('image_id', imgId)
-    const allRows = data || []
-    
-    revealed = new Set(allRows.filter(r => r.revealed).map(r => r.id))
-
-    // Only pre-reveal if image has NO tiles at all in DB
-    if(allRows.length === 0) {
-      const preCount = Math.floor(Math.random() * 21) + 30 // 30 to 50
-      const allTiles = Array.from({length: 100}, (_,i) => i)
-      const shuffled = allTiles.sort(() => Math.random() - 0.5)
-      const toReveal = shuffled.slice(0, preCount)
-
-      // Insert pre-revealed tiles to Supabase once
-      const rows = toReveal.map(id => ({
-        id,
-        image_id: imgId,
-        revealed: true,
-        wallet: 'pre_revealed',
-        revealed_at: new Date().toISOString()
-      }))
-
-      try {
-        await db.from('tiles').upsert(rows, { onConflict: 'id,image_id' })
-      } catch(e) { console.error('Pre-reveal error:', e) }
-
-      toReveal.forEach(id => revealed.add(id))
-    }
+    const { data } = await db.from('tiles').select('id').eq('revealed', true).eq('image_id', imgId)
+    revealed = new Set((data||[]).map(r => r.id))
   } catch(e) { revealed = new Set() }
   buildGrid()
   updateStats()
