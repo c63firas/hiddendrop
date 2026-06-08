@@ -12,10 +12,10 @@ const db = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_K
 // ─── TELEGRAM ─────────────────────────────────────────────────────
 async function sendTelegram(msg) {
   try {
-    await fetch(`https://api.telegram.org/bot${process.env.8919737686:AAEw3QREj8sdy0RFRxo9qMazMQrVo7eZCME}/sendMessage`, {
+    await fetch(`https://api.telegram.org/bot${process.env.TELEGRAM_TOKEN}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: process.env.1089976850, text: msg, parse_mode: 'HTML' })
+      body: JSON.stringify({ chat_id: process.env.TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML' })
     })
   } catch(e) { console.error('Telegram error:', e) }
 }
